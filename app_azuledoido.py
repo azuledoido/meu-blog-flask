@@ -15,7 +15,14 @@ def obter_arquivo_datas():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT EXTRACT(YEAR FROM data_criacao)::int, EXTRACT(MONTH FROM data_criacao)::int, COUNT(*) FROM posts GROUP BY 1, 2 ORDER BY 1 DESC, 2 DESC")
+        cur.execute("""
+            SELECT EXTRACT(YEAR FROM data_criacao)::int, 
+                   EXTRACT(MONTH FROM data_criacao)::int, 
+                   COUNT(*) 
+            FROM posts 
+            GROUP BY 1, 2 
+            ORDER BY 1 DESC, 2 DESC
+        """)
         datas = cur.fetchall()
         cur.close()
         conn.close()
@@ -48,7 +55,6 @@ def mural():
             if n and m:
                 cur.execute('INSERT INTO mural (nome, mensagem) VALUES (%s, %s)', (n, m))
                 conn.commit()
-        # Buscamos a data já formatada para evitar erro no .strftime do HTML
         cur.execute("SELECT nome, mensagem, TO_CHAR(data_criacao, 'HH24:MI - DD/MM') FROM mural ORDER BY data_criacao DESC")
         recados = cur.fetchall()
         cur.close()
@@ -84,7 +90,13 @@ def arquivo(ano, mes):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE EXTRACT(YEAR FROM data_criacao) = %s AND EXTRACT(MONTH FROM data_criacao) = %s ORDER BY data_criacao DESC", (ano, mes))
+        cur.execute("""
+            SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') 
+            FROM posts 
+            WHERE EXTRACT(YEAR FROM data_criacao) = %s 
+            AND EXTRACT(MONTH FROM data_criacao) = %s 
+            ORDER BY data_criacao DESC
+        """, (ano, mes))
         posts = cur.fetchall()
         datas = obter_arquivo_datas()
         cur.close()
@@ -107,28 +119,38 @@ def escrever():
             return redirect('/')
     return render_template('escrever.html')
 
+# --- ROTAS DE MODERAÇÃO ---
+
 @app.route('/admin/comentarios')
 def admin_comentarios():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT c.id, c.nome, c.comentario, TO_CHAR(c.data_criacao, 'DD/MM HH24:MI'), p.titulo FROM comentarios_posts c JOIN posts p ON c.post_id = p.id ORDER BY c.data_criacao DESC")
+        cur.execute("""
+            SELECT c.id, c.nome, c.comentario, TO_CHAR(c.data_criacao, 'DD/MM HH24:MI'), p.titulo 
+            FROM comentarios_posts c 
+            JOIN posts p ON c.post_id = p.id 
+            ORDER BY c.data_criacao DESC
+        """)
         comentarios = cur.fetchall()
         cur.close()
         conn.close()
         return render_template('admin_comentarios.html', comentarios=comentarios)
     except Exception as e:
-        return f"Erro moderação: {e}"
+        return f"Erro na moderação: {e}"
 
 @app.route('/deletar_comentario/<int:com_id>', methods=['POST'])
 def deletar_comentario(com_id):
     if request.form.get('senha_adm') == SENHA_ADM:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("DELETE FROM comentarios_posts WHERE id = %s", (com_id,))
-        conn.commit()
-        cur.close()
-        conn.close()
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("DELETE FROM comentarios_posts WHERE id = %s", (com_id,))
+            conn.commit()
+            cur.close()
+            conn.close()
+        except Exception as e:
+            return f"Erro ao deletar: {e}"
     return redirect('/admin/comentarios')
 
 if __name__ == '__main__':
