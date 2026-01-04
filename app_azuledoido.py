@@ -11,6 +11,28 @@ def get_db_connection():
         database_url = database_url.replace("postgresql://", "postgres://", 1)
     return psycopg2.connect(database_url)
 
+# --- NOVA FUNÇÃO DO CONTADOR ---
+def obter_total_acessos():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        # Cria a tabela se não existir
+        cur.execute("CREATE TABLE IF NOT EXISTS contador (id SERIAL PRIMARY KEY, total INTEGER);")
+        # Garante que tenha um registro inicial com a "semente" de 1500
+        cur.execute("INSERT INTO contador (id, total) SELECT 1, 1500 WHERE NOT EXISTS (SELECT 1 FROM contador WHERE id = 1);")
+        # Incrementa +1
+        cur.execute("UPDATE contador SET total = total + 1 WHERE id = 1")
+        conn.commit()
+        # Puxa o valor atualizado
+        cur.execute("SELECT total FROM contador WHERE id = 1")
+        total = cur.fetchone()[0]
+        cur.close()
+        conn.close()
+        return total
+    except Exception as e:
+        print(f"Erro no contador: {e}")
+        return "---"
+
 def obter_arquivo_datas():
     try:
         conn = get_db_connection()
@@ -33,6 +55,7 @@ def obter_arquivo_datas():
 @app.route('/')
 def home():
     try:
+        acessos = obter_total_acessos() # Chamada do contador
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC")
@@ -40,9 +63,12 @@ def home():
         datas = obter_arquivo_datas()
         cur.close()
         conn.close()
-        return render_template('index.html', posts=posts, datas_arquivo=datas)
+        # Passando a variável 'acessos' para o template
+        return render_template('index.html', posts=posts, datas_arquivo=datas, acessos=acessos)
     except Exception as e:
         return f"Erro na Home: {e}"
+
+# ... (restante das suas rotas mural, exibir_post, arquivo, escrever, admin continuam iguais)
 
 @app.route('/mural', methods=['GET', 'POST'])
 def mural():
@@ -118,8 +144,6 @@ def escrever():
             conn.close()
             return redirect('/')
     return render_template('escrever.html')
-
-# --- ROTAS DE MODERAÇÃO ---
 
 @app.route('/admin/comentarios')
 def admin_comentarios():
