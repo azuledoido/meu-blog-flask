@@ -11,8 +11,12 @@
         nav a { color: #00aaff; margin: 0 10px; text-decoration: none; font-weight: bold; }
         .layout { max-width: 1200px; margin: auto; padding: 15px; }
         .item { background: #1c3a5e; padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 5px solid #00aaff; word-wrap: break-word; overflow: hidden; }
-        .item img, .item iframe { max-width: 100% !important; height: auto !important; aspect-ratio: 16/9; }
-        .titulo-link { color: #00aaff; font-size: 1.5rem; font-weight: bold; text-decoration: none; }
+        
+        /* Regra inquebrável para imagens e vídeos */
+        .item img, .item iframe { max-width: 100% !important; height: auto !important; }
+        .item iframe { aspect-ratio: 16/9; width: 100% !important; }
+        
+        .titulo-link { color: #00aaff; font-size: 1.5rem; font-weight: bold; text-decoration: none; display: block; }
         .sidebar { background: #162a44; padding: 20px; border-radius: 10px; border: 1px solid #00aaff; }
 
         @media (min-width: 768px) {
@@ -24,24 +28,4 @@
 </head>
 <body>
     <nav>
-        <a href="/">🏠 BLOG</a>
-        <a href="/mural">💬 MURAL</a>
-        <a href="/escrever">✍️ POST</a>
-    </nav>
-    <div class="layout">
-        <div class="conteudo">
-            <h1>📑 Publicações</h1>
-            {% for p in posts %}
-            <div class="item">
-                <a href="/post/{{ p[0] }}" class="titulo-link">{{ p[1] }}</a>
-                <div style="margin-top:10px;">{{ p[2]|safe }}</div>
-                <hr style="border:0; border-top:1px solid #162a44; margin:15px 0;">
-                <small>📅 {{ p[3] }}</small>
-            </div>
-            {% endfor %}
-        </div>
-        <div class="sidebar">
-            <h3>📅 ARQUIVO</h3>
-            {% for data in datas_arquivo %}
-            <a href="/arquivo/{{ data[0]|int }}/{{ data[1]|int }}" style="display:block; color:#00aaff; margin:10px 0; text-decoration:none;">
-                📁 {{ data[1] }}/{{ data
+        <a href="/">🏠
