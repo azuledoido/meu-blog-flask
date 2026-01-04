@@ -20,6 +20,19 @@
         
         .sidebar { background: #162a44; padding: 20px; border-radius: 10px; border: 1px solid #00aaff; margin-top: 20px; }
         
+        /* Estilo do novo contador no topo */
+        .contador-topo {
+            text-align: center; 
+            padding: 10px; 
+            background: #162a44; 
+            border-radius: 10px; 
+            border: 1px solid #00aaff; 
+            margin-bottom: 20px; 
+            font-family: monospace; 
+            color: #00aaff;
+            font-size: 1rem;
+        }
+        
         @media (min-width: 768px) {
             .layout { display: flex; gap: 20px; }
             .conteudo { flex: 3; }
@@ -36,6 +49,10 @@
 
     <div class="layout">
         <main class="conteudo">
+            <div class="contador-topo">
+                👁️ {{ acessos }} VISUALIZAÇÕES
+            </div>
+
             <h1>📑 Publicações ({{ posts|length if posts else 0 }})</h1>
             
             {% if posts %}
@@ -56,15 +73,4 @@
             <h3>📅 ARQUIVO</h3>
             {% if datas_arquivo %}
                 {% for d in datas_arquivo %}
-                <a href="/arquivo/{{ d[0] }}/{{ d[1] }}" style="display:block; color:#00aaff; margin:10px 0; text-decoration:none;">📁 {{ d[1] }}/{{ d[0] }}</a>
-                {% endfor %}
-            {% endif %}
-
-            <hr style="border:0; border-top:1px solid #00aaff; margin:20px 0; opacity: 0.3;">
-            <div style="text-align: center; font-size: 0.85rem; color: #00aaff; font-family: monospace;">
-                👁️ {{ acessos }} VISUALIZAÇÕES
-            </div>
-        </aside>
-    </div>
-</body>
-</html>
+                <a href="/arquivo/{{ d[0] }}/{{ d[1] }}"
