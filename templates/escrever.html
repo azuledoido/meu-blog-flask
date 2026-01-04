@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Novo Post - Azul e Doido</title>
+    <style>
+        body { background-color: #0b1e33; color: white; font-family: sans-serif; margin: 0; }
+        nav { background: #162a44; padding: 15px; text-align: center; border-bottom: 2px solid #00aaff; }
+        nav a { color: #00aaff; margin: 0 20px; text-decoration: none; font-weight: bold; }
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; background: #1c3a5e; color: white; box-sizing: border-box; }
+        
+        /* Destaque para o campo de senha */
+        .campo-senha { border: 1px solid #00aaff; }
+        
+        button { background: #00aaff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; width: 100%; margin-top: 10px; }
+        button:hover { background: #0088cc; }
+        
+        .aviso-seguranca { font-size: 0.8em; color: #888; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">🏠 BLOG</a>
+        <a href="/mural">💬 MURAL DE RECADOS</a>
+        <a href="/escrever">✍️ NOVO POST (ADM)</a>
+    </nav>
+    <div class="container">
+        <h1>✍️ Painel do Autor</h1>
+        <form method="POST">
+            <input name="titulo" placeholder="Título do Post" required>
+            
+            <textarea name="conteudo" rows="15" placeholder="Escreva o texto do blog aqui... Dica: Você pode usar tags HTML para imagens e links!" required></textarea>
+            
+            <label class="aviso-seguranca">🔒 Validação de Identidade:</label>
+            <input type="password" name="senha_adm" class="campo-senha" placeholder="Digite a Senha Mestra para Publicar" required>
+            
+            <button type="submit">🚀 Publicar no Blog</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Azul e Doido - Blog</title>
+    <style>
+        body { background-color: #0b1e33; color: white; font-family: sans-serif; margin: 0; }
+        nav { background: #162a44; padding: 15px; text-align: center; border-bottom: 2px solid #00aaff; }
+        nav a { color: #00aaff; margin: 0 20px; text-decoration: none; font-weight: bold; }
+        .layout { display: flex; max-width: 1000px; margin: 20px auto; padding: 20px; gap: 30px; }
+        .conteudo { flex: 3; }
+        .sidebar { flex: 1; background: #162a44; padding: 20px; border-radius: 10px; height: fit-content; }
+        .item { background: #1c3a5e; padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 5px solid #00aaff; }
+        .data { font-size: 0.8em; color: #888; }        .mes-link { display: block; color: #00aaff; text-decoration: none; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">🏠 BLOG</a>
+        <a href="/mural">💬 MURAL DE RECADOS</a>
+        <a href="/escrever">✍️ NOVO POST (ADM)</a>
+    </nav>
+
+    <div class="layout">
+        <div class="conteudo">
+            <h1>Últimas Resenhas</h1>
+            {% for p in posts %}
+            <div class="item">
+                <h2>{{ p[0] }}</h2>
+                <p>{{ p[1]|safe }}</p>
+                <span class="data">{{ p[2].strftime("%d/%m/%Y") }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <aside class="sidebar">
+            <h3>📅 ARQUIVO</h3>
+            {% for ano, mes, total in datas_arquivo %}
+                <a href="#" class="mes-link">
+                    {{ "%02d" % mes|int }}/{{ ano|int }} ({{ total }})
+                </a>
+            {% endfor %}
+        </aside>
+    </div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: estudos_docker-app-1
+    ports:
+      - "5000:5000"
+    depends_on:
+      - pgdb
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://azuledoido:123@pgdb:5432/meubanco
+      - REDIS_URL=redis://redis:6379/0
+
+  pgdb:
+    image: postgres:15
+    container_name: estudos_docker-pgdb-1
+    environment:
+      POSTGRES_USER: azuledoido
+      POSTGRES_PASSWORD: "123"
+      POSTGRES_DB: meubanco
+    ports:
+      - "5432:5432"
+    volumes:
+      - /home/azul/postgres_data_segura:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    container_name: estudos_docker-redis-1
+    ports:
+      - "6379:6379"

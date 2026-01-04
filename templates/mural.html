@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mural - Azul e Doido</title>
+    <style>
+        body { background-color: #0b1e33; color: white; font-family: sans-serif; margin: 0; }
+        nav { background: #162a44; padding: 15px; text-align: center; border-bottom: 2px solid #00aaff; }
+        nav a { color: #00aaff; margin: 0 20px; text-decoration: none; font-weight: bold; }
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; }
+        .item { background: #1c3a5e; padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 5px solid #00aaff; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; background: #0b1e33; color: white; box-sizing: border-box; }
+        button { background: #00aaff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .data { font-size: 0.8em; color: #888; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">🏠 BLOG</a>
+        <a href="/mural">💬 MURAL DE RECADOS</a>
+        <a href="/escrever">✍️ NOVO POST (ADM)</a>
+    </nav>
+    <div class="container">
+        <h1>Deixe um Recado</h1>
+        <form method="POST">
+            <input name="nome" placeholder="Seu Nome" required>
+            <textarea name="recado" placeholder="Sua mensagem..." required></textarea>
+            <button type="submit">Enviar Recado</button>
+        </form>
+        <hr style="border: 0.5px solid #162a44; margin: 30px 0;">
+        {% for r in recados %}
+            <div class="item">
+                <strong>{{ r[0] }}:</strong> {{ r[1] }} <br>
+                <span class="data">{{ r[2].strftime("%H:%M - %d/%m") }}</span>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
