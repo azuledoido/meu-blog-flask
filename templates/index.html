@@ -36,7 +36,6 @@
             border-radius: 8px;
         }
 
-        /* Estilo para o link do título não mudar o visual */
         .titulo-link {
             text-decoration: none;
             color: inherit;
@@ -92,4 +91,10 @@
 
             {% for data in datas_arquivo %}
                 <a href="/arquivo/{{ data[0]|int }}/{{ data[1]|int }}" class="mes-link">
-                    📁 {{ "%02
+                    📁 {{ data[1]|int }}/{{ data[0]|int }} ({{ data[2] }} posts)
+                </a>
+            {% endfor %}
+        </aside>
+    </div>
+</body>
+</html>
