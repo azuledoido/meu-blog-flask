@@ -41,4 +41,30 @@
             {% if posts %}
                 {% for p in posts %}
                 <div class="item">
-                    <a href="/post/{{ p[0] }}" style="color:#00aaff; text-decoration:none; font-size:1.5rem; font-weight
+                    <a href="/post/{{ p[0] }}" style="color:#00aaff; text-decoration:none; font-size:1.5rem; font-weight:bold;">{{ p[1] }}</a>
+                    <div style="margin-top:15px;">{{ p[2]|safe }}</div>
+                    <hr style="border:0; border-top:1px solid #162a44; margin:15px 0;">
+                    <small>📅 {{ p[3] }}</small>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>Nenhuma publicação encontrada no momento.</p>
+            {% endif %}
+        </main>
+
+        <aside class="sidebar">
+            <h3>📅 ARQUIVO</h3>
+            {% if datas_arquivo %}
+                {% for d in datas_arquivo %}
+                <a href="/arquivo/{{ d[0] }}/{{ d[1] }}" style="display:block; color:#00aaff; margin:10px 0; text-decoration:none;">📁 {{ d[1] }}/{{ d[0] }}</a>
+                {% endfor %}
+            {% endif %}
+
+            <hr style="border:0; border-top:1px solid #00aaff; margin:20px 0; opacity: 0.3;">
+            <div style="text-align: center; font-size: 0.85rem; color: #00aaff; font-family: monospace;">
+                👁️ {{ acessos }} VISUALIZAÇÕES
+            </div>
+        </aside>
+    </div>
+</body>
+</html>
