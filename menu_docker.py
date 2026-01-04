@@ -1,21 +1,26 @@
 import os
+from datetime import datetime
 
 def limpar_tela():
     os.system('clear')
 
 def menu():
-    # Centralizando a pasta do projeto
+    # Caminho da sua pasta
     pasta = "/home/azul/estudos_docker"
+    # Nome do container do banco conforme identificado pelo seu sistema
+    container_db = "estudos_docker-db-1"
     
     while True:
         limpar_tela()
-        print("--- 🔵 SISTEMA MURAL AZULEDOIDO 2026 🔵 ---")
+        print("--- 🔵 PAINEL DE CONTROLE: AZULEDOIDO 2026 🔵 ---")
         print("1. Ver Status (Containers Online)")
-        print("2. LIGAR SISTEMA (App + Banco)")
-        print("3. VER LOGS (Acompanhar em tempo real)")
-        print("4. VER RECADOS (Direto no Postgres)")
-        print("5. RESET DE FÁBRICA (Limpar tudo e apagar dados)")
-        print("6. Sair")
+        print("2. LIGAR BANCO (Docker Up)")
+        print("3. LIMPAR AMBIENTE (Docker Down - Parar tudo)")
+        print("4. 🚀 INICIAR BLOG (Rodar app_azuledoido.py)")
+        print("5. 💾 FAZER BACKUP (Gerar arquivo .sql)")
+        print("6. VER RECADOS (Direto no Postgres)")
+        print("7. RESET DE FÁBRICA (Cuidado!)")
+        print("8. Sair")
 
         opcao = input("\nEscolha uma opção: ")
 
@@ -25,33 +30,43 @@ def menu():
             input("\nEnter para voltar.")
         
         elif opcao == '2':
-            print("\n🚀 Subindo Orquestração (Buildando novidades)...")
-            # Usamos o --build para garantir que as mudanças no app_azuledoido.py entrem no Docker
-            os.system(f"cd {pasta} && docker compose up -d --build")
-            print("\n✅ Sistema ON! Acesse: http://localhost:5000")
-            input("\nEnter para voltar.")
-        
+            print("\n🚀 Subindo containers...")
+            os.system(f"cd {pasta} && docker compose up -d")
+            input("\n✅ Banco Online! Enter para voltar.")
+
         elif opcao == '3':
-            print("\n👀 Mostrando Logs (Pressione CTRL+C para sair dos logs e voltar ao menu)")
-            # Mostra logs do app e do banco juntos para você ver a conversa entre eles
-            os.system(f"cd {pasta} && docker compose logs -f")
-            input("\nVoltando ao menu... Enter.")
+            print("\n🧹 Limpando e parando tudo...")
+            os.system(f"cd {pasta} && docker compose down")
+            input("\n✅ Sistema desligado com sucesso. Enter para voltar.")
 
         elif opcao == '4':
-            print("\n--- 📝 RECADOS NO BANCO DE DADOS ---")
-            os.system(f"docker exec -it estudos_docker_pgdb_1 psql -U azuledoido -d meubanco -c 'SELECT * FROM mensagens;'")
+            print("\n🌐 Iniciando o Blog Flask... (CTRL+C para encerrar)")
+            os.system(f"cd {pasta} && python3 app_azuledoido.py")
+        
+        elif opcao == '5':
+            data_atual = datetime.now().strftime("%Y-%m-%d_%H-%M")
+            nome_arquivo = f"backup_blog_{data_atual}.sql"
+            print(f"\n📦 Criando backup: {nome_arquivo}")
+            # COMANDO CORRIGIDO COM O NOME DO CONTAINER ATUAL
+            os.system(f"docker exec {container_db} pg_dump -U azuledoido meubanco > {pasta}/{nome_arquivo}")
+            print(f"\n✅ Salvo na pasta {pasta}!")
             input("\nEnter para voltar.")
 
-        elif opcao == '5':
-            confirmar = input("\n⚠️ Isso vai apagar TODOS os recados e resetar o banco. Confirma? (s/n): ")
-            if confirmar.lower() == 's':
-                print("\n🧹 Limpando volumes e containers...")
-                os.system(f"cd {pasta} && docker compose down -v")
-                os.system(f"sudo rm -rf /home/azul/postgres_data_segura/*")
-                input("\nReset concluído! Use a opção 2 para ligar novamente. Enter.")
-        
         elif opcao == '6':
-            print("Até logo, azul e doido! Salvando progresso...")
+            print("\n--- 📝 RECADOS NO BANCO ---")
+            # COMANDO CORRIGIDO PARA VER MENSAGENS
+            os.system(f"docker exec -it {container_db} psql -U azuledoido -d meubanco -c 'SELECT * FROM mensagens;'")
+            input("\nEnter para voltar.")
+
+        elif opcao == '7':
+            confirmar = input("\n⚠️ APAGAR TUDO (Inclusive mensagens)? (s/n): ")
+            if confirmar.lower() == 's':
+                os.system(f"cd {pasta} && docker compose down -v")
+                print("\nReset concluído.")
+                input("\nEnter.")
+        
+        elif opcao == '8':
+            print("Até logo, azul e doido!")
             break
         
         else:
