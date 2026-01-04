@@ -44,19 +44,17 @@ def mural():
         cur = conn.cursor()
         if request.method == 'POST':
             n = request.form.get('nome')
-            # Ajustado para 'recado' para bater com o seu HTML
             m = request.form.get('recado') 
             if n and m:
                 cur.execute('INSERT INTO mural (nome, mensagem) VALUES (%s, %s)', (n, m))
                 conn.commit()
-        
         cur.execute("SELECT nome, mensagem, data_criacao FROM mural ORDER BY data_criacao DESC")
         recados = cur.fetchall()
         cur.close()
         conn.close()
         return render_template('mural.html', recados=recados)
     except Exception as e:
-        return f"Erro no Mural: {e}. Verifique se a tabela 'mural' existe."
+        return f"Erro no Mural: {e}"
 
 @app.route('/post/<int:post_id>', methods=['GET', 'POST'])
 def exibir_post(post_id):
@@ -69,7 +67,6 @@ def exibir_post(post_id):
             if nome and comentario:
                 cur.execute('INSERT INTO comentarios_posts (post_id, nome, comentario) VALUES (%s, %s, %s)', (post_id, nome, comentario))
                 conn.commit()
-
         cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE id = %s", (post_id,))
         post = cur.fetchone()
         cur.execute("SELECT nome, comentario, data_criacao FROM comentarios_posts WHERE post_id = %s ORDER BY data_criacao DESC", (post_id,))
@@ -93,13 +90,4 @@ def escrever():
             cur.close()
             conn.close()
             return redirect('/')
-        return "Senha incorreta", 403
-    return render_template('escrever.html')
-
-@app.route('/admin/comentarios')
-def admin_comentarios():
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT c.id, c
+    return render_template('escrever.html
