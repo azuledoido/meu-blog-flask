@@ -1,181 +1,81 @@
-import os
-import psycopg2
-from flask import Flask, render_template, request, redirect
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azul e Doido - Blog</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    
+    <style>
+        * { box-sizing: border-box; }
+        body { background-color: #0b1e33; color: white; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        nav { background: #162a44; padding: 15px; text-align: center; border-bottom: 2px solid #00aaff; }
+        nav a { color: #00aaff; margin: 0 10px; text-decoration: none; font-weight: bold; }
+        .layout { max-width: 1200px; margin: auto; padding: 15px; }
+        .item { background: #1c3a5e; padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 5px solid #00aaff; word-wrap: break-word; }
+        
+        .item img, .item iframe { max-width: 100% !important; height: auto !important; }
+        .item iframe { aspect-ratio: 16/9; width: 100% !important; border: none; border-radius: 8px; }
+        
+        .sidebar { background: #162a44; padding: 20px; border-radius: 10px; border: 1px solid #00aaff; margin-top: 20px; }
+        
+        .contador-topo {
+            text-align: center; 
+            padding: 12px; 
+            background: #162a44; 
+            border-radius: 10px; 
+            border: 1px solid #00aaff; 
+            margin-bottom: 20px; 
+            font-family: monospace; 
+            color: #00aaff;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        @media (min-width: 768px) {
+            .layout { display: flex; gap: 20px; }
+            .conteudo { flex: 3; }
+            .sidebar { width: 250px; margin-top: 0; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">🏠 BLOG</a>
+        <a href="/mural">💬 MURAL</a>
+        <a href="/escrever">✍️ POST</a>
+    </nav>
 
-app = Flask(__name__)
-SENHA_ADM = "3484020200"
+    <div class="layout">
+        <main class="conteudo">
+            <div class="contador-topo">
+                👁️ {{ acessos }} VISUALIZAÇÕES
+            </div>
 
-def get_db_connection():
-    database_url = os.environ.get('DATABASE_URL')
-    if database_url and database_url.startswith("postgresql://"):
-        database_url = database_url.replace("postgresql://", "postgres://", 1)
-    return psycopg2.connect(database_url)
+            <h1>📑 Publicações ({{ posts|length if posts else 0 }})</h1>
+            
+            {% if posts %}
+                {% for p in posts %}
+                <div class="item">
+                    <a href="/post/{{ p[0] }}" style="color:#00aaff; text-decoration:none; font-size:1.5rem; font-weight:bold;">{{ p[1] }}</a>
+                    <div style="margin-top:15px;">{{ p[2]|safe }}</div>
+                    <hr style="border:0; border-top:1px solid #162a44; margin:15px 0;">
+                    <small>📅 {{ p[3] }}</small>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>Nenhuma publicação encontrada no momento.</p>
+            {% endif %}
+        </main>
 
-# --- NOVA FUNÇÃO DO CONTADOR ---
-def obter_total_acessos():
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        # Cria a tabela se não existir
-        cur.execute("CREATE TABLE IF NOT EXISTS contador (id SERIAL PRIMARY KEY, total INTEGER);")
-        # Garante que tenha um registro inicial com a "semente" de 1500
-        cur.execute("INSERT INTO contador (id, total) SELECT 1, 1500 WHERE NOT EXISTS (SELECT 1 FROM contador WHERE id = 1);")
-        # Incrementa +1
-        cur.execute("UPDATE contador SET total = total + 1 WHERE id = 1")
-        conn.commit()
-        # Puxa o valor atualizado
-        cur.execute("SELECT total FROM contador WHERE id = 1")
-        total = cur.fetchone()[0]
-        cur.close()
-        conn.close()
-        return total
-    except Exception as e:
-        print(f"Erro no contador: {e}")
-        return "---"
-
-def obter_arquivo_datas():
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT EXTRACT(YEAR FROM data_criacao)::int, 
-                   EXTRACT(MONTH FROM data_criacao)::int, 
-                   COUNT(*) 
-            FROM posts 
-            GROUP BY 1, 2 
-            ORDER BY 1 DESC, 2 DESC
-        """)
-        datas = cur.fetchall()
-        cur.close()
-        conn.close()
-        return datas
-    except:
-        return []
-
-@app.route('/')
-def home():
-    try:
-        acessos = obter_total_acessos() # Chamada do contador
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC")
-        posts = cur.fetchall()
-        datas = obter_arquivo_datas()
-        cur.close()
-        conn.close()
-        # Passando a variável 'acessos' para o template
-        return render_template('index.html', posts=posts, datas_arquivo=datas, acessos=acessos)
-    except Exception as e:
-        return f"Erro na Home: {e}"
-
-# ... (restante das suas rotas mural, exibir_post, arquivo, escrever, admin continuam iguais)
-
-@app.route('/mural', methods=['GET', 'POST'])
-def mural():
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        if request.method == 'POST':
-            n = request.form.get('nome')
-            m = request.form.get('recado') 
-            if n and m:
-                cur.execute('INSERT INTO mural (nome, mensagem) VALUES (%s, %s)', (n, m))
-                conn.commit()
-        cur.execute("SELECT nome, mensagem, TO_CHAR(data_criacao, 'HH24:MI - DD/MM') FROM mural ORDER BY data_criacao DESC")
-        recados = cur.fetchall()
-        cur.close()
-        conn.close()
-        return render_template('mural.html', recados=recados)
-    except Exception as e:
-        return f"Erro no Mural: {e}"
-
-@app.route('/post/<int:post_id>', methods=['GET', 'POST'])
-def exibir_post(post_id):
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        if request.method == 'POST':
-            nome = request.form.get('nome')
-            comentario = request.form.get('comentario')
-            if nome and comentario:
-                cur.execute('INSERT INTO comentarios_posts (post_id, nome, comentario) VALUES (%s, %s, %s)', (post_id, nome, comentario))
-                conn.commit()
-        cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE id = %s", (post_id,))
-        post = cur.fetchone()
-        cur.execute("SELECT nome, comentario, TO_CHAR(data_criacao, 'DD/MM HH24:MI') FROM comentarios_posts WHERE post_id = %s ORDER BY data_criacao DESC", (post_id,))
-        comentarios = cur.fetchall()
-        datas = obter_arquivo_datas()
-        cur.close()
-        conn.close()
-        return render_template('post_unico.html', post=post, comentarios=comentarios, datas_arquivo=datas)
-    except Exception as e:
-        return f"Erro no Post: {e}"
-
-@app.route('/arquivo/<int:ano>/<int:mes>')
-def arquivo(ano, mes):
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') 
-            FROM posts 
-            WHERE EXTRACT(YEAR FROM data_criacao) = %s 
-            AND EXTRACT(MONTH FROM data_criacao) = %s 
-            ORDER BY data_criacao DESC
-        """, (ano, mes))
-        posts = cur.fetchall()
-        datas = obter_arquivo_datas()
-        cur.close()
-        conn.close()
-        return render_template('index.html', posts=posts, datas_arquivo=datas)
-    except Exception as e:
-        return f"Erro no Arquivo: {e}"
-
-@app.route('/escrever', methods=['GET', 'POST'])
-def escrever():
-    if request.method == 'POST':
-        if request.form.get('senha_adm') == SENHA_ADM:
-            t, c = request.form['titulo'], request.form['conteudo']
-            conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute('INSERT INTO posts (titulo, conteudo) VALUES (%s, %s)', (t, c))
-            conn.commit()
-            cur.close()
-            conn.close()
-            return redirect('/')
-    return render_template('escrever.html')
-
-@app.route('/admin/comentarios')
-def admin_comentarios():
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT c.id, c.nome, c.comentario, TO_CHAR(c.data_criacao, 'DD/MM HH24:MI'), p.titulo 
-            FROM comentarios_posts c 
-            JOIN posts p ON c.post_id = p.id 
-            ORDER BY c.data_criacao DESC
-        """)
-        comentarios = cur.fetchall()
-        cur.close()
-        conn.close()
-        return render_template('admin_comentarios.html', comentarios=comentarios)
-    except Exception as e:
-        return f"Erro na moderação: {e}"
-
-@app.route('/deletar_comentario/<int:com_id>', methods=['POST'])
-def deletar_comentario(com_id):
-    if request.form.get('senha_adm') == SENHA_ADM:
-        try:
-            conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute("DELETE FROM comentarios_posts WHERE id = %s", (com_id,))
-            conn.commit()
-            cur.close()
-            conn.close()
-        except Exception as e:
-            return f"Erro ao deletar: {e}"
-    return redirect('/admin/comentarios')
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5001)))
+        <aside class="sidebar">
+            <h3>📅 ARQUIVO</h3>
+            {% if datas_arquivo %}
+                {% for d in datas_arquivo %}
+                <a href="/arquivo/{{ d[0] }}/{{ d[1] }}" style="display:block; color:#00aaff; margin:10px 0; text-decoration:none;">📁 {{ d[1] }}/{{ d[0] }}</a>
+                {% endfor %}
+            {% endif %}
+        </aside>
+    </div>
+</body>
+</html>
