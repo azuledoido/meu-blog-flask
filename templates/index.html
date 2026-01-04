@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Azul e Doido - Blog</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    
     <style>
         * { box-sizing: border-box; }
         body { background-color: #0b1e33; color: white; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
@@ -11,8 +13,13 @@
         nav a { color: #00aaff; margin: 0 10px; text-decoration: none; font-weight: bold; }
         .layout { max-width: 1200px; margin: auto; padding: 15px; }
         .item { background: #1c3a5e; padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 5px solid #00aaff; word-wrap: break-word; }
+        
+        /* Ajuste para vídeos e imagens não quebrarem o layout */
         .item img, .item iframe { max-width: 100% !important; height: auto !important; }
+        .item iframe { aspect-ratio: 16/9; width: 100% !important; border: none; border-radius: 8px; }
+        
         .sidebar { background: #162a44; padding: 20px; border-radius: 10px; border: 1px solid #00aaff; margin-top: 20px; }
+        
         @media (min-width: 768px) {
             .layout { display: flex; gap: 20px; }
             .conteudo { flex: 3; }
