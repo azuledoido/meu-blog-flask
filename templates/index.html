@@ -6,38 +6,40 @@
         body { background-color: #0b1e33; color: white; font-family: sans-serif; margin: 0; }
         nav { background: #162a44; padding: 15px; text-align: center; border-bottom: 2px solid #00aaff; }
         nav a { color: #00aaff; margin: 0 20px; text-decoration: none; font-weight: bold; }
-        
-        /* Estilo para o link secreto */
-        .admin-link {
-            font-size: 0.8em;
-            opacity: 0.2; /* Quase invisível */
-            transition: opacity 0.3s;
-        }
-        .admin-link:hover {
-            opacity: 1; /* Revela ao passar o mouse */
-        }
+        .admin-link { opacity: 0.2; font-size: 0.8em; }
+        .layout { max-width: 900px; margin: 20px auto; padding: 20px; }
+        .item { background: #1c3a5e; padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 5px solid #00aaff; }
+        .titulo-link { text-decoration: none; color: #00aaff; font-size: 1.5em; font-weight: bold; }
+        .sidebar { background: #162a44; padding: 15px; border-radius: 10px; margin-top: 20px; border: 1px solid #00aaff; }
+        .mes-link { display: block; color: #00aaff; text-decoration: none; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">🏠 BLOG</a>
+        <a href="/mural">💬 MURAL</a>
+        <a href="/escrever">✍️ POST</a>
+        <a href="/admin/comentarios" class="admin-link">⚙️</a>
+    </nav>
 
-        .layout { 
-            display: flex; 
-            max-width: 1100px; 
-            margin: 20px auto; 
-            padding: 20px; 
-            gap: 20px; 
-        }
-        
-        .conteudo { flex: 3; min-width: 0; }
-        
-        .sidebar { 
-            flex: 1; 
-            background: #162a44; 
-            padding: 20px; 
-            border-radius: 10px; 
-            border: 2px solid #00aaff;
-            height: fit-content;
-        }
+    <div class="layout">
+        <h1>📑 Publicações</h1>
+        {% for p in posts %}
+        <div class="item">
+            <a href="/post/{{ p[0] }}" class="titulo-link">{{ p[1] }}</a>
+            <div style="margin-top:10px;">{{ p[2]|safe }}</div>
+            <small style="color: #888;">📅 {{ p[3] }}</small>
+        </div>
+        {% endfor %}
 
-        .item { background: #1c3a5e; padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 5px solid #00aaff; overflow: hidden; }
-        
-        .item img { 
-            max-width: 100% !important; 
-            height:
+        <div class="sidebar">
+            <h3>📅 ARQUIVO</h3>
+            {% for data in datas_arquivo %}
+            <a href="/arquivo/{{ data[0]|int }}/{{ data[1]|int }}" class="mes-link">
+                📁 {{ data[1] }}/{{ data[0] }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
