@@ -48,7 +48,8 @@ def mural():
             if n and m:
                 cur.execute('INSERT INTO mural (nome, mensagem) VALUES (%s, %s)', (n, m))
                 conn.commit()
-        cur.execute("SELECT nome, mensagem, data_criacao FROM mural ORDER BY data_criacao DESC")
+        # Buscamos a data já formatada para evitar erro no .strftime do HTML
+        cur.execute("SELECT nome, mensagem, TO_CHAR(data_criacao, 'HH24:MI - DD/MM') FROM mural ORDER BY data_criacao DESC")
         recados = cur.fetchall()
         cur.close()
         conn.close()
@@ -69,7 +70,7 @@ def exibir_post(post_id):
                 conn.commit()
         cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE id = %s", (post_id,))
         post = cur.fetchone()
-        cur.execute("SELECT nome, comentario, data_criacao FROM comentarios_posts WHERE post_id = %s ORDER BY data_criacao DESC", (post_id,))
+        cur.execute("SELECT nome, comentario, TO_CHAR(data_criacao, 'DD/MM HH24:MI') FROM comentarios_posts WHERE post_id = %s ORDER BY data_criacao DESC", (post_id,))
         comentarios = cur.fetchall()
         datas = obter_arquivo_datas()
         cur.close()
@@ -77,6 +78,20 @@ def exibir_post(post_id):
         return render_template('post_unico.html', post=post, comentarios=comentarios, datas_arquivo=datas)
     except Exception as e:
         return f"Erro no Post: {e}"
+
+@app.route('/arquivo/<int:ano>/<int:mes>')
+def arquivo(ano, mes):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE EXTRACT(YEAR FROM data_criacao) = %s AND EXTRACT(MONTH FROM data_criacao) = %s ORDER BY data_criacao DESC", (ano, mes))
+        posts = cur.fetchall()
+        datas = obter_arquivo_datas()
+        cur.close()
+        conn.close()
+        return render_template('index.html', posts=posts, datas_arquivo=datas)
+    except Exception as e:
+        return f"Erro no Arquivo: {e}"
 
 @app.route('/escrever', methods=['GET', 'POST'])
 def escrever():
