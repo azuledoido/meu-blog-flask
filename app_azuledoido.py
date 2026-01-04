@@ -73,4 +73,70 @@ def mural():
             if n and m:
                 cur.execute('INSERT INTO mural (nome, mensagem) VALUES (%s, %s)', (n, m))
                 conn.commit()
-        cur.execute("SELECT nome, mensagem, TO_CHAR(data_criacao, 'HH24:
+        # LINHA 76 CORRIGIDA ABAIXO:
+        cur.execute("SELECT nome, mensagem, TO_CHAR(data_criacao, 'HH24:MI - DD/MM') FROM mural ORDER BY data_criacao DESC")
+        recados = cur.fetchall()
+        cur.close()
+        conn.close()
+        return render_template('mural.html', recados=recados)
+    except Exception as e:
+        return f"Erro no Mural: {e}"
+
+@app.route('/post/<int:post_id>', methods=['GET', 'POST'])
+def exibir_post(post_id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        if request.method == 'POST':
+            nome = request.form.get('nome')
+            comentario = request.form.get('comentario')
+            if nome and comentario:
+                cur.execute('INSERT INTO comentarios_posts (post_id, nome, comentario) VALUES (%s, %s, %s)', (post_id, nome, comentario))
+                conn.commit()
+        cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE id = %s", (post_id,))
+        post = cur.fetchone()
+        cur.execute("SELECT nome, comentario, TO_CHAR(data_criacao, 'DD/MM HH24:MI') FROM comentarios_posts WHERE post_id = %s ORDER BY data_criacao DESC", (post_id,))
+        comentarios = cur.fetchall()
+        datas = obter_arquivo_datas()
+        cur.close()
+        conn.close()
+        return render_template('post_unico.html', post=post, comentarios=comentarios, datas_arquivo=datas)
+    except Exception as e:
+        return f"Erro no Post: {e}"
+
+@app.route('/arquivo/<int:ano>/<int:mes>')
+def arquivo(ano, mes):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') 
+            FROM posts 
+            WHERE EXTRACT(YEAR FROM data_criacao) = %s 
+            AND EXTRACT(MONTH FROM data_criacao) = %s 
+            ORDER BY data_criacao DESC
+        """, (ano, mes))
+        posts = cur.fetchall()
+        datas = obter_arquivo_datas()
+        cur.close()
+        conn.close()
+        return render_template('index.html', posts=posts, datas_arquivo=datas)
+    except Exception as e:
+        return f"Erro no Arquivo: {e}"
+
+@app.route('/escrever', methods=['GET', 'POST'])
+def escrever():
+    if request.method == 'POST':
+        if request.form.get('senha_adm') == SENHA_ADM:
+            t, c = request.form['titulo'], request.form['conteudo']
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute('INSERT INTO posts (titulo, conteudo) VALUES (%s, %s)', (t, c))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return redirect('/')
+    return render_template('escrever.html')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5001)))
