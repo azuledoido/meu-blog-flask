@@ -7,6 +7,16 @@
         nav { background: #162a44; padding: 15px; text-align: center; border-bottom: 2px solid #00aaff; }
         nav a { color: #00aaff; margin: 0 20px; text-decoration: none; font-weight: bold; }
         
+        /* Estilo para o link secreto */
+        .admin-link {
+            font-size: 0.8em;
+            opacity: 0.2;
+            transition: opacity 0.3s;
+        }
+        .admin-link:hover {
+            opacity: 1;
+        }
+
         .layout { display: flex; max-width: 1100px; margin: 20px auto; padding: 20px; gap: 20px; }
         .conteudo { flex: 3; min-width: 0; }
         .sidebar { flex: 1; background: #162a44; padding: 20px; border-radius: 10px; border: 2px solid #00aaff; height: fit-content; }
@@ -16,6 +26,7 @@
         
         .data { font-size: 0.8em; color: #888; display: block; margin-bottom: 20px; }
         .mes-link { display: block; color: #00aaff; text-decoration: none; margin: 10px 0; padding: 5px; border-bottom: 1px solid #2c4e7a; }
+        .mes-link:hover { background: #1c3a5e; color: white; }
 
         /* Estilo da Área de Comentários */
         .secao-comentarios { margin-top: 50px; background: #162a44; padding: 20px; border-radius: 10px; border: 1px solid #00aaff; }
@@ -23,63 +34,4 @@
         .form-comentario input, .form-comentario textarea { 
             background: #0b1e33; border: 1px solid #00aaff; color: white; padding: 10px; border-radius: 5px; 
         }
-        .btn-enviar { background: #00aaff; color: #0b1e33; border: none; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 5px; }
-        .btn-enviar:hover { background: white; }
-
-        .comentario-item { border-bottom: 1px solid #2c4e7a; padding: 15px 0; }
-        .comentario-nome { color: #00aaff; font-weight: bold; }
-        .comentario-data { font-size: 0.7em; color: #888; }
-    </style>
-</head>
-<body>
-    <nav>
-        <a href="/">🏠 VOLTAR AO BLOG</a>
-        <a href="/mural">💬 MURAL DE RECADOS</a>
-    </nav>
-
-    <div class="layout">
-        <div class="conteudo">
-            <div class="item">
-                <span class="data">📅 Publicado em: {{ post[3] }}</span>
-                <h1>{{ post[1] }}</h1>
-                <div class="texto-post">
-                    {{ post[2]|safe }}
-                </div>
-            </div>
-
-            <div class="secao-comentarios">
-                <h3>📢 Deixe um comentário sobre este post</h3>
-                <form class="form-comentario" method="POST">
-                    <input type="text" name="nome" placeholder="Seu nome" required>
-                    <textarea name="comentario" rows="4" placeholder="O que você achou deste post?" required></textarea>
-                    <button type="submit" class="btn-enviar">PUBLICAR COMENTÁRIO</button>
-                </form>
-
-                <hr style="border: 0; border-top: 1px solid #2c4e7a;">
-
-                <h3>💬 Comentários ({{ comentarios|length }})</h3>
-                {% for c in comentarios %}
-                <div class="comentario-item">
-                    <span class="comentario-nome">{{ c[0] }}</span> 
-                    <span class="comentario-data">em {{ c[2] }}</span>
-                    <p>{{ c[1] }}</p>
-                </div>
-                {% endfor %}
-                
-                {% if not comentarios %}
-                    <p style="color: #888;">Nenhum comentário ainda. Seja o primeiro!</p>
-                {% endif %}
-            </div>
-        </div>
-
-        <aside class="sidebar">
-            <h3>📅 ARQUIVO</h3>
-            {% for data in datas_arquivo %}
-                <a href="/arquivo/{{ data[0]|int }}/{{ data[1]|int }}" class="mes-link">
-                    📁 {{ "%02d" % data[1]|int }}/{{ data[0]|int }}
-                </a>
-            {% endfor %}
-        </aside>
-    </div>
-</body>
-</html>
+        .btn-enviar { background: #00aaff; color: #0b1e33; border: none; padding: 10px; font-weight: bold; cursor: pointer; border-radius:
