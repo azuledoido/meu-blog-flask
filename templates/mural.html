@@ -1,38 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mural - Azul e Doido</title>
     <style>
-        body { background-color: #0b1e33; color: white; font-family: sans-serif; margin: 0; }
+        * { box-sizing: border-box; }
+        body { 
+            background-color: #0b1e33; 
+            color: white; 
+            font-family: sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            overflow-x: hidden; 
+        }
         nav { background: #162a44; padding: 15px; text-align: center; border-bottom: 2px solid #00aaff; }
-        nav a { color: #00aaff; margin: 0 20px; text-decoration: none; font-weight: bold; }
-        .container { max-width: 800px; margin: 20px auto; padding: 20px; }
-        .item { background: #1c3a5e; padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 5px solid #00aaff; }
-        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; background: #0b1e33; color: white; box-sizing: border-box; }
-        button { background: #00aaff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; }
-        .data { font-size: 0.8em; color: #888; }
+        nav a { color: #00aaff; margin: 0 10px; text-decoration: none; font-weight: bold; }
+        
+        .container { max-width: 800px; margin: auto; padding: 15px; }
+        
+        /* Formulário de recado */
+        .form-mural { 
+            background: #162a44; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border: 1px solid #00aaff; 
+            margin-bottom: 30px; 
+        }
+        input, textarea { 
+            width: 100%; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 8px; 
+            border: 1px solid #00aaff; 
+            background: #0b1e33; 
+            color: white; 
+            font-size: 16px; 
+        }
+        button { 
+            background: #00aaff; 
+            color: white; 
+            border: none; 
+            padding: 15px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            border-radius: 8px; 
+            width: 100%; 
+            font-size: 16px;
+        }
+
+        /* Lista de recados */
+        .recado { 
+            background: #1c3a5e; 
+            padding: 20px; 
+            margin-bottom: 15px; 
+            border-radius: 10px; 
+            border-left: 5px solid #00aaff; 
+            word-wrap: break-word;
+        }
+        .recado strong { color: #00aaff; font-size: 1.1rem; }
+        .recado small { color: #888; display: block; margin-top: 5px; }
+
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .form-mural { padding: 15px; }
+            h1 { font-size: 1.6rem; text-align: center; }
+        }
     </style>
 </head>
 <body>
     <nav>
         <a href="/">🏠 BLOG</a>
-        <a href="/mural">💬 MURAL DE RECADOS</a>
-        <a href="/escrever">✍️ NOVO POST (ADM)</a>
+        <a href="/escrever">✍️ POST</a>
     </nav>
+
     <div class="container">
-        <h1>Deixe um Recado</h1>
-        <form method="POST">
-            <input name="nome" placeholder="Seu Nome" required>
-            <textarea name="recado" placeholder="Sua mensagem..." required></textarea>
-            <button type="submit">Enviar Recado</button>
-        </form>
-        <hr style="border: 0.5px solid #162a44; margin: 30px 0;">
-        {% for r in recados %}
-            <div class="item">
-                <strong>{{ r[0] }}:</strong> {{ r[1] }} <br>
-                <span class="data">{{ r[2].strftime("%H:%M - %d/%m") }}</span>
+        <h1>💬 Mural de Recados</h1>
+
+        <div class="form-mural">
+            <form method="POST">
+                <input type="text" name="nome" placeholder="Seu apelido" required>
+                <textarea name="mensagem" rows="3" placeholder="Deixe seu recado aqui..." required></textarea>
+                <button type="submit">POSTAR NO MURAL</button>
+            </form>
+        </div>
+
+        <div class="lista-recados">
+            {% for m in mensagens %}
+            <div class="recado">
+                <strong>👤 {{ m[0] }}</strong>
+                <p style="margin: 10px 0;">{{ m[1] }}</p>
+                <small>📅 {{ m[2] }}</small>
             </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     </div>
 </body>
 </html>
