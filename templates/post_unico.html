@@ -1,60 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ post[1] }} - Azul e Doido</title>
     <style>
-        body { background-color: #0b1e33; color: white; font-family: sans-serif; margin: 0; }
+        * { box-sizing: border-box; }
+        body { background-color: #0b1e33; color: white; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; line-height: 1.6; }
         nav { background: #162a44; padding: 15px; text-align: center; border-bottom: 2px solid #00aaff; }
-        nav a { color: #00aaff; margin: 0 20px; text-decoration: none; font-weight: bold; }
-        .layout { display: flex; max-width: 1000px; margin: 20px auto; padding: 20px; gap: 20px; }
-        .conteudo { flex: 3; }
-        .sidebar { flex: 1; background: #162a44; padding: 15px; border-radius: 10px; border: 1px solid #00aaff; height: fit-content; }
-        .item { background: #1c3a5e; padding: 25px; border-radius: 10px; border-left: 5px solid #00aaff; }
-        .comentario { border-bottom: 1px solid #2c4e7a; padding: 10px 0; margin-top: 10px; }
-        input, textarea { width: 100%; padding: 10px; margin: 5px 0; background: #0b1e33; color: white; border: 1px solid #00aaff; box-sizing: border-box; }
-        button { background: #00aaff; color: white; border: none; padding: 10px; cursor: pointer; font-weight: bold; width: 100%; }
+        nav a { color: #00aaff; margin: 0 10px; text-decoration: none; font-weight: bold; }
+        
+        .layout { max-width: 900px; margin: auto; padding: 15px; }
+        
+        .post-completo { background: #1c3a5e; padding: 25px; border-radius: 10px; border-left: 5px solid #00aaff; }
+        .post-completo img, .post-completo iframe { max-width: 100% !important; height: auto !important; border-radius: 8px; }
+        .post-completo iframe { aspect-ratio: 16/9; width: 100% !important; }
+        
+        h1 { color: #00aaff; font-size: 2rem; margin-top: 0; }
+        .conteudo-texto { font-size: 1.1rem; word-wrap: break-word; }
+
+        .secao-comentarios { margin-top: 30px; background: #162a44; padding: 20px; border-radius: 10px; }
+        .comentario-item { border-bottom: 1px solid #2c4e7a; padding: 10px 0; }
+        
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #00aaff; background: #0b1e33; color: white; }
+        button { background: #00aaff; color: white; border: none; padding: 12px 20px; font-weight: bold; cursor: pointer; border-radius: 5px; width: 100%; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.5rem; }
+            .post-completo { padding: 15px; }
+        }
     </style>
 </head>
 <body>
     <nav>
-        <a href="/">🏠 BLOG</a>
+        <a href="/">🏠 HOME</a>
         <a href="/mural">💬 MURAL</a>
     </nav>
 
     <div class="layout">
-        <div class="conteudo">
-            <div class="item">
-                <h1>{{ post[1] }}</h1>
-                <small style="color: #888;">📅 Publicado em: {{ post[3] }}</small>
-                <div style="margin-top: 20px;">{{ post[2]|safe }}</div>
+        <article class="post-completo">
+            <h1>{{ post[1] }}</h1>
+            <small style="color: #888;">📅 Publicado em: {{ post[3] }}</small>
+            <hr style="border: 0; border-top: 1px solid #162a44; margin: 20px 0;">
+            
+            <div class="conteudo-texto">
+                {{ post[2]|safe }}
             </div>
+        </article>
 
-            <div style="margin-top: 40px; background: #162a44; padding: 20px; border-radius: 10px;">
-                <h3>📢 Comentar</h3>
-                <form method="POST">
-                    <input type="text" name="nome" placeholder="Seu nome" required>
-                    <textarea name="comentario" placeholder="Sua opinião..." rows="3" required></textarea>
-                    <button type="submit">PUBLICAR COMENTÁRIO</button>
-                </form>
+        <section class="secao-comentarios">
+            <h3>💬 Comentários</h3>
+            <form method="POST">
+                <input type="text" name="nome" placeholder="Seu nome" required>
+                <textarea name="comentario" rows="3" placeholder="Escreva seu comentário..." required></textarea>
+                <button type="submit">Enviar Comentário</button>
+            </form>
 
-                <h3 style="margin-top: 30px;">💬 Comentários ({{ comentarios|length }})</h3>
+            <div style="margin-top: 20px;">
                 {% for c in comentarios %}
-                    <div class="comentario">
-                        <b style="color: #00aaff;">{{ c[0] }}</b> <small style="color: #888;">em {{ c[2] }}</small>
-                        <p>{{ c[1] }}</p>
-                    </div>
+                <div class="comentario-item">
+                    <strong>{{ c[0] }}</strong> <small style="color: #888;">- {{ c[2] }}</small>
+                    <p style="margin: 5px 0;">{{ c[1] }}</p>
+                </div>
                 {% endfor %}
             </div>
-        </div>
-
-        <aside class="sidebar">
-            <h3>📅 ARQUIVO</h3>
-            {% for data in datas_arquivo %}
-                <a href="/arquivo/{{ data[0]|int }}/{{ data[1]|int }}" style="color: #00aaff; text-decoration: none; display: block; margin: 10px 0;">
-                    📁 {{ data[1] }}/{{ data[0] }}
-                </a>
-            {% endfor %}
-        </aside>
+        </section>
     </div>
 </body>
 </html>
