@@ -90,4 +90,31 @@ def escrever():
             cur.close()
             conn.close()
             return redirect('/')
-    return render_template('escrever.html
+    return render_template('escrever.html')
+
+@app.route('/admin/comentarios')
+def admin_comentarios():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT c.id, c.nome, c.comentario, TO_CHAR(c.data_criacao, 'DD/MM HH24:MI'), p.titulo FROM comentarios_posts c JOIN posts p ON c.post_id = p.id ORDER BY c.data_criacao DESC")
+        comentarios = cur.fetchall()
+        cur.close()
+        conn.close()
+        return render_template('admin_comentarios.html', comentarios=comentarios)
+    except Exception as e:
+        return f"Erro moderação: {e}"
+
+@app.route('/deletar_comentario/<int:com_id>', methods=['POST'])
+def deletar_comentario(com_id):
+    if request.form.get('senha_adm') == SENHA_ADM:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM comentarios_posts WHERE id = %s", (com_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+    return redirect('/admin/comentarios')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5001)))
