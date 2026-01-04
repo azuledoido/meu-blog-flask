@@ -1,42 +1,21 @@
 import os
 import psycopg2
 from flask import Flask, render_template, request, redirect
-from datetime import datetime
 
 app = Flask(__name__)
-
-# Senha de Administração
 SENHA_ADM = "3484020200"
 
 def get_db_connection():
     database_url = os.environ.get('DATABASE_URL')
-    if database_url:
-        if database_url.startswith("postgresql://"):
-            database_url = database_url.replace("postgresql://", "postgres://", 1)
-        return psycopg2.connect(database_url)
-    else:
-        return psycopg2.connect(
-            host="127.0.0.1", 
-            database="meubanco", 
-            user="azuledoido", 
-            password="123", 
-            port="5432"
-        )
+    if database_url and database_url.startswith("postgresql://"):
+        database_url = database_url.replace("postgresql://", "postgres://", 1)
+    return psycopg2.connect(database_url)
 
 def obter_arquivo_datas():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        query = """
-            SELECT 
-                EXTRACT(YEAR FROM data_criacao)::int as ano,
-                EXTRACT(MONTH FROM data_criacao)::int as mes,
-                COUNT(*) as total
-            FROM posts
-            GROUP BY ano, mes
-            ORDER BY ano DESC, mes DESC;
-        """
-        cur.execute(query)
+        cur.execute("SELECT EXTRACT(YEAR FROM data_criacao)::int, EXTRACT(MONTH FROM data_criacao)::int, COUNT(*) FROM posts GROUP BY 1, 2 ORDER BY 1 DESC, 2 DESC")
         datas = cur.fetchall()
         cur.close()
         conn.close()
@@ -51,12 +30,33 @@ def home():
         cur = conn.cursor()
         cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC")
         posts = cur.fetchall()
+        datas = obter_arquivo_datas()
         cur.close()
         conn.close()
-        lista_arquivos = obter_arquivo_datas()
-        return render_template('index.html', posts=posts, datas_arquivo=lista_arquivos)
+        return render_template('index.html', posts=posts, datas_arquivo=datas)
     except Exception as e:
-        return f"Erro no Banco de Dados: {e}."
+        return f"Erro na Home: {e}"
+
+@app.route('/mural', methods=['GET', 'POST'])
+def mural():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        if request.method == 'POST':
+            n = request.form.get('nome')
+            # Ajustado para 'recado' para bater com o seu HTML
+            m = request.form.get('recado') 
+            if n and m:
+                cur.execute('INSERT INTO mural (nome, mensagem) VALUES (%s, %s)', (n, m))
+                conn.commit()
+        
+        cur.execute("SELECT nome, mensagem, data_criacao FROM mural ORDER BY data_criacao DESC")
+        recados = cur.fetchall()
+        cur.close()
+        conn.close()
+        return render_template('mural.html', recados=recados)
+    except Exception as e:
+        return f"Erro no Mural: {e}. Verifique se a tabela 'mural' existe."
 
 @app.route('/post/<int:post_id>', methods=['GET', 'POST'])
 def exibir_post(post_id):
@@ -69,45 +69,37 @@ def exibir_post(post_id):
             if nome and comentario:
                 cur.execute('INSERT INTO comentarios_posts (post_id, nome, comentario) VALUES (%s, %s, %s)', (post_id, nome, comentario))
                 conn.commit()
+
         cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE id = %s", (post_id,))
         post = cur.fetchone()
-        cur.execute("SELECT nome, comentario, TO_CHAR(data_criacao, 'DD/MM/YYYY HH24:MI') FROM comentarios_posts WHERE post_id = %s ORDER BY data_criacao DESC", (post_id,))
+        cur.execute("SELECT nome, comentario, data_criacao FROM comentarios_posts WHERE post_id = %s ORDER BY data_criacao DESC", (post_id,))
         comentarios = cur.fetchall()
+        datas = obter_arquivo_datas()
         cur.close()
         conn.close()
-        if post:
-            lista_arquivos = obter_arquivo_datas()
-            return render_template('post_unico.html', post=post, comentarios=comentarios, datas_arquivo=lista_arquivos)
-        else:
-            return "Post não encontrado", 404
+        return render_template('post_unico.html', post=post, comentarios=comentarios, datas_arquivo=datas)
     except Exception as e:
-        return f"Erro ao carregar o post: {e}"
+        return f"Erro no Post: {e}"
 
-# --- NOVAS ROTAS DE GERENCIAMENTO ---
+@app.route('/escrever', methods=['GET', 'POST'])
+def escrever():
+    if request.method == 'POST':
+        if request.form.get('senha_adm') == SENHA_ADM:
+            t, c = request.form['titulo'], request.form['conteudo']
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute('INSERT INTO posts (titulo, conteudo) VALUES (%s, %s)', (t, c))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return redirect('/')
+        return "Senha incorreta", 403
+    return render_template('escrever.html')
 
 @app.route('/admin/comentarios')
 def admin_comentarios():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        # JOIN para saber o título do post onde o comentário foi feito
         cur.execute("""
-            SELECT c.id, c.nome, c.comentario, TO_CHAR(c.data_criacao, 'DD/MM HH24:MI'), p.titulo 
-            FROM comentarios_posts c
-            JOIN posts p ON c.post_id = p.id
-            ORDER BY c.data_criacao DESC
-        """)
-        comentarios = cur.fetchall()
-        cur.close()
-        conn.close()
-        return render_template('admin_comentarios.html', comentarios=comentarios)
-    except Exception as e:
-        return f"Erro na moderação: {e}"
-
-@app.route('/deletar_comentario/<int:com_id>', methods=['POST'])
-def deletar_comentario(com_id):
-    senha = request.form.get('senha_adm')
-    if senha == SENHA_ADM:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("DELETE FROM comentarios_posts WHERE id = %s", (com_id,))
+            SELECT c.id, c
