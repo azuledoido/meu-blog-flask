@@ -14,63 +14,24 @@
         .layout { max-width: 1200px; margin: auto; padding: 15px; }
         .item { background: #1c3a5e; padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 5px solid #00aaff; word-wrap: break-word; }
         
-        /* Ajuste para vídeos e imagens não quebrarem o layout */
         .item img, .item iframe { max-width: 100% !important; height: auto !important; }
         .item iframe { aspect-ratio: 16/9; width: 100% !important; border: none; border-radius: 8px; }
         
         .sidebar { background: #162a44; padding: 20px; border-radius: 10px; border: 1px solid #00aaff; margin-top: 20px; }
         
-        /* Estilo do novo contador no topo */
+        /* Estilo do Contador no Topo */
         .contador-topo {
             text-align: center; 
-            padding: 10px; 
+            padding: 12px; 
             background: #162a44; 
             border-radius: 10px; 
             border: 1px solid #00aaff; 
             margin-bottom: 20px; 
             font-family: monospace; 
             color: #00aaff;
-            font-size: 1rem;
+            font-size: 1.1rem;
+            font-weight: bold;
         }
         
         @media (min-width: 768px) {
-            .layout { display: flex; gap: 20px; }
-            .conteudo { flex: 3; }
-            .sidebar { width: 250px; margin-top: 0; }
-        }
-    </style>
-</head>
-<body>
-    <nav>
-        <a href="/">🏠 BLOG</a>
-        <a href="/mural">💬 MURAL</a>
-        <a href="/escrever">✍️ POST</a>
-    </nav>
-
-    <div class="layout">
-        <main class="conteudo">
-            <div class="contador-topo">
-                👁️ {{ acessos }} VISUALIZAÇÕES
-            </div>
-
-            <h1>📑 Publicações ({{ posts|length if posts else 0 }})</h1>
-            
-            {% if posts %}
-                {% for p in posts %}
-                <div class="item">
-                    <a href="/post/{{ p[0] }}" style="color:#00aaff; text-decoration:none; font-size:1.5rem; font-weight:bold;">{{ p[1] }}</a>
-                    <div style="margin-top:15px;">{{ p[2]|safe }}</div>
-                    <hr style="border:0; border-top:1px solid #162a44; margin:15px 0;">
-                    <small>📅 {{ p[3] }}</small>
-                </div>
-                {% endfor %}
-            {% else %}
-                <p>Nenhuma publicação encontrada no momento.</p>
-            {% endif %}
-        </main>
-
-        <aside class="sidebar">
-            <h3>📅 ARQUIVO</h3>
-            {% if datas_arquivo %}
-                {% for d in datas_arquivo %}
-                <a href="/arquivo/{{ d[0] }}/{{ d[1] }}"
+            .layout { display: flex; gap:
