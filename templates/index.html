@@ -28,13 +28,22 @@
 
         .item { background: #1c3a5e; padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 5px solid #00aaff; overflow: hidden; }
         
-        /* CORREÇÃO DAS IMAGENS MANTIDA */
         .item img { 
             max-width: 100% !important; 
             height: auto !important; 
             display: block; 
             margin: 15px 0;
             border-radius: 8px;
+        }
+
+        /* Estilo para o link do título não mudar o visual */
+        .titulo-link {
+            text-decoration: none;
+            color: inherit;
+            transition: 0.3s;
+        }
+        .titulo-link:hover {
+            color: #00aaff;
         }
 
         .data { font-size: 0.8em; color: #888; display: block; margin-top: 10px; }
@@ -57,11 +66,15 @@
             
             {% for p in posts %}
             <div class="item">
-                <h2>{{ p[0] }}</h2>
+                <h2>
+                    <a href="/post/{{ p[0] }}" class="titulo-link">
+                        {{ p[1] }}
+                    </a>
+                </h2>
                 <div class="texto-post">
-                    {{ p[1]|safe }}
+                    {{ p[2]|safe }}
                 </div>
-                <span class="data">📅 {{ p[2] }}</span>
+                <span class="data">📅 {{ p[3] }}</span>
             </div>
             {% endfor %}
             
@@ -79,10 +92,4 @@
 
             {% for data in datas_arquivo %}
                 <a href="/arquivo/{{ data[0]|int }}/{{ data[1]|int }}" class="mes-link">
-                    📁 {{ "%02d" % data[1]|int }}/{{ data[0]|int }} ({{ data[2] }} posts)
-                </a>
-            {% endfor %}
-        </aside>
-    </div>
-</body>
-</html>
+                    📁 {{ "%02d" % data[1]|
