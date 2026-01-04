@@ -3,24 +3,33 @@
 <head>
     <title>Azul e Doido - Blog</title>
     <style>
-        body { background-color: #0b1e33; color: white; font-family: sans-serif; margin: 0; }
+        /* 1. Impede a barra de rolagem lateral e ajusta o box-sizing */
+        * { box-sizing: border-box; }
+        body { background-color: #0b1e33; color: white; font-family: sans-serif; margin: 0; overflow-x: hidden; }
+        
         nav { background: #162a44; padding: 15px; text-align: center; border-bottom: 2px solid #00aaff; }
         nav a { color: #00aaff; margin: 0 20px; text-decoration: none; font-weight: bold; }
         .admin-link { opacity: 0.2; font-size: 0.8em; }
         
-        /* Ajuste para colocar a sidebar ao lado dos posts */
+        /* 2. Layout Flexível com proteção contra estouro */
         .layout { 
             display: flex; 
-            max-width: 1100px; 
+            max-width: 1200px; 
             margin: 20px auto; 
-            padding: 20px; 
-            gap: 25px; 
+            padding: 0 20px; 
+            gap: 20px; 
         }
         
-        .conteudo-principal { flex: 3; }
+        /* 3. Coluna principal não pode crescer além do espaço flex */
+        .conteudo-principal { 
+            flex: 3; 
+            min-width: 0; 
+        }
         
+        /* 4. Sidebar com tamanho fixo para não sumir */
         .sidebar { 
-            flex: 1; 
+            width: 260px;
+            min-width: 260px; 
             background: #162a44; 
             padding: 20px; 
             border-radius: 10px; 
@@ -30,50 +39,24 @@
             top: 20px;
         }
 
-        .item { background: #1c3a5e; padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 5px solid #00aaff; }
-        .titulo-link { text-decoration: none; color: #00aaff; font-size: 1.5em; font-weight: bold; }
+        .item { 
+            background: #1c3a5e; 
+            padding: 25px; 
+            margin-bottom: 20px; 
+            border-radius: 10px; 
+            border-left: 5px solid #00aaff;
+            overflow-wrap: break-word; /* Quebra textos muito longos */
+        }
+
+        /* 5. O AJUSTE CRUCIAL: Força imagens e vídeos a caberem no post */
+        .item img, .item iframe, .item video {
+            max-width: 100% !important;
+            height: auto !important;
+            border-radius: 8px;
+            display: block;
+            margin: 10px 0;
+        }
+
+        .titulo-link { text-decoration: none; color: #00aaff; font-size: 1.5em; font-weight: bold; display: block; }
         .mes-link { display: block; color: #00aaff; text-decoration: none; margin: 10px 0; font-weight: bold; }
-        .mes-link:hover { text-decoration: underline; }
-    </style>
-</head>
-<body>
-    <nav>
-        <a href="/">🏠 BLOG</a>
-        <a href="/mural">💬 MURAL</a>
-        <a href="/escrever">✍️ POST</a>
-        <a href="/admin/comentarios" class="admin-link">⚙️</a>
-    </nav>
-
-    <div class="layout">
-        <div class="conteudo-principal">
-            <h1>📑 Publicações</h1>
-            {% for p in posts %}
-            <div class="item">
-                <a href="/post/{{ p[0] }}" class="titulo-link">{{ p[1] }}</a>
-                <div style="margin-top:10px;">{{ p[2]|safe }}</div>
-                <hr style="border: 0.1px solid #162a44; margin: 15px 0;">
-                <small style="color: #888;">📅 {{ p[3] }}</small>
-            </div>
-            {% endfor %}
-            
-            {% if not posts %}
-                <p>Nenhuma publicação encontrada para este período.</p>
-            {% endif %}
-        </div>
-
-        <aside class="sidebar">
-            <h3>📅 ARQUIVO</h3>
-            <hr style="border: 0.5px solid #00aaff; margin-bottom: 15px;">
-            {% for data in datas_arquivo %}
-            <a href="/arquivo/{{ data[0]|int }}/{{ data[1]|int }}" class="mes-link">
-                📁 {{ data[1] }}/{{ data[0] }}
-            </a>
-            {% endfor %}
-            
-            {% if not datas_arquivo %}
-                <small style="color: #888;">Nenhum arquivo disponível.</small>
-            {% endif %}
-        </aside>
-    </div>
-</body>
-</html>
+        .
