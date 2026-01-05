@@ -112,9 +112,15 @@
         </main>
 
         <aside>
-            <h3 style="color: #38bdf8; margin-top: 0;">📅 ARQUIVO</h3>
-            <p style="font-size: 0.9rem; color: #88aacc;">Navegue pelas datas das postagens.</p>
-            </aside>
-    </div>
-</body>
-</html>
+    <h3 style="color: #38bdf8; margin-top: 0;">📅 ARQUIVO</h3>
+    {% if datas_arquivo %}
+        {% for d in datas_arquivo %}
+        <a href="#" class="link-arquivo">
+            📁 {{ d[1] }}/{{ d[0] }} 
+            <span class="badge-count">{{ d[2] }}</span>
+        </a>
+        {% endfor %}
+    {% else %}
+        <p style="color: #88aacc; font-size: 0.8rem;">Nenhum arquivo disponível.</p>
+    {% endif %}
+</aside>
