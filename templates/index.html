@@ -5,37 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Azul e Doido - Blog</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        * { box-sizing: border-box; }
-        body { background-color: #0b1e33; color: white; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
-        nav { background: #162a44; padding: 15px; text-align: center; border-bottom: 2px solid #00aaff; }
-        nav a { color: #00aaff; margin: 0 10px; text-decoration: none; font-weight: bold; }
-        .layout { max-width: 1200px; margin: auto; padding: 15px; }
-        .item { background: #1c3a5e; padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 5px solid #00aaff; word-wrap: break-word; }
-        
-        .item img, .item iframe { max-width: 100% !important; height: auto !important; }
-        .item iframe { aspect-ratio: 16/9; width: 100% !important; border: none; border-radius: 8px; }
-        
-        .sidebar { background: #162a44; padding: 20px; border-radius: 10px; border: 1px solid #00aaff; margin-top: 20px; }
-        
-        .contador-topo {
-            text-align: center; 
-            padding: 12px; 
-            background: #162a44; 
-            border-radius: 10px; 
-            border: 1px solid #00aaff; 
-            margin-bottom: 20px; 
-            font-family: monospace; 
-            color: #00aaff;
-            font-size: 1.1rem;
+        .badge-count {
+            background-color: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
             font-weight: bold;
+            float: right;
         }
-        
-        @media (min-width: 768px) {
-            .layout { display: flex; gap: 20px; }
-            .conteudo { flex: 3; }
-            .sidebar { width: 250px; margin-top: 0; }
+        .link-arquivo {
+            display: block;
+            padding: 8px;
+            text-decoration: none;
+            color: inherit;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .link-arquivo:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+            color: #007bff;
+        }
+        .post-date {
+            color: #ffffff; 
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+        .item {
+            margin-bottom: 30px;
+            padding: 15px;
+            border-left: 4px solid transparent;
+            transition: border-color 0.3s;
+        }
+        .item:hover {
+            border-left: 4px solid #007bff;
+        }
+        .divisor {
+            border: 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin: 10px 0;
         }
     </style>
 </head>
@@ -57,14 +71,16 @@
             {% if posts %}
                 {% for p in posts %}
                 <div class="item">
-                    <a href="/post/{{ p[0] }}" style="color:#00aaff; text-decoration:none; font-size:1.5rem; font-weight:bold;">{{ p[1] }}</a>
-                    <div style="margin-top:15px;">{{ p[2]|safe }}</div>
-                    <hr style="border:0; border-top:1px solid #162a44; margin:15px 0;">
-                    <small>📅 {{ p[3] }}</small>
+                    <a href="/post/{{ p[0] }}" class="post-title">{{ p[1] }}</a>
+                    <div class="post-body">{{ p[2]|safe }}</div>
+                    <hr class="divisor">
+                    <div class="post-date">📅 {{ p[3] }}</div>
                 </div>
                 {% endfor %}
             {% else %}
-                <p>Nenhuma publicação encontrada no momento.</p>
+                <div class="item">
+                    <p>Nenhuma publicação encontrada no momento.</p>
+                </div>
             {% endif %}
         </main>
 
@@ -72,8 +88,13 @@
             <h3>📅 ARQUIVO</h3>
             {% if datas_arquivo %}
                 {% for d in datas_arquivo %}
-                <a href="/arquivo/{{ d[0] }}/{{ d[1] }}" style="display:block; color:#00aaff; margin:10px 0; text-decoration:none;">📁 {{ d[1] }}/{{ d[0] }}</a>
+                <a href="/arquivo/{{ d[0] }}/{{ d[1] }}" class="link-arquivo">
+                    📁 {{ "%02d" % d[1] }}/{{ d[0] }} 
+                    <span class="badge-count">{{ d[2] }}</span>
+                </a>
                 {% endfor %}
+            {% else %}
+                <p>Sem arquivos.</p>
             {% endif %}
         </aside>
     </div>

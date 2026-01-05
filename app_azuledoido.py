@@ -6,7 +6,7 @@ app = Flask(__name__)
 SENHA_ADM = "3484020200"
 
 def get_db_connection():
-    database_url = os.environ.get('DATABASE_URL')
+    database_url = os.environ.get('DATABASE_URL', 'postgresql://azuledoido:123@pgdb:5432/meubanco')
     if database_url and database_url.startswith("postgresql://"):
         database_url = database_url.replace("postgresql://", "postgres://", 1)
     return psycopg2.connect(database_url)
@@ -53,6 +53,7 @@ def home():
         acessos = obter_total_acessos()
         conn = get_db_connection()
         cur = conn.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS posts (id SERIAL PRIMARY KEY, titulo TEXT, conteudo TEXT, data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP);")
         cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC")
         posts = cur.fetchall()
         datas = obter_arquivo_datas()
@@ -67,13 +68,13 @@ def mural():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS mural (id SERIAL PRIMARY KEY, nome TEXT, mensagem TEXT, data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP);")
         if request.method == 'POST':
             n = request.form.get('nome')
             m = request.form.get('recado') 
             if n and m:
                 cur.execute('INSERT INTO mural (nome, mensagem) VALUES (%s, %s)', (n, m))
                 conn.commit()
-        # LINHA 76 CORRIGIDA ABAIXO:
         cur.execute("SELECT nome, mensagem, TO_CHAR(data_criacao, 'HH24:MI - DD/MM') FROM mural ORDER BY data_criacao DESC")
         recados = cur.fetchall()
         cur.close()
@@ -87,6 +88,7 @@ def exibir_post(post_id):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS comentarios_posts (id SERIAL PRIMARY KEY, post_id INTEGER, nome TEXT, comentario TEXT, data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP);")
         if request.method == 'POST':
             nome = request.form.get('nome')
             comentario = request.form.get('comentario')
@@ -139,4 +141,4 @@ def escrever():
     return render_template('escrever.html')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5001)))
+    app.run(host='0.0.0.0', port=5000)
