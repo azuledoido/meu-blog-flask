@@ -72,6 +72,27 @@ def home():
         pass
     return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
 
+# ROTA PARA POST INDIVIDUAL (CONECTADA AO SEU post_unico.html)
+@app.route('/post/<int:post_id>')
+def ver_post(post_id):
+    acessos = obter_total_acessos()
+    datas_arquivo = obter_arquivo_datas()
+    post = None
+    try:
+        conn = get_db_connection()
+        if conn:
+            cur = conn.cursor()
+            cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE id = %s", (post_id,))
+            post = cur.fetchone()
+            cur.close()
+            conn.close()
+    except Exception as e:
+        print(f"Erro ao ver post: {e}")
+    
+    if post:
+        return render_template('post_unico.html', post=post, acessos=acessos, datas_arquivo=datas_arquivo)
+    return redirect(url_for('home'))
+
 @app.route('/arquivo/<int:ano>/<int:mes>')
 def arquivo(ano, mes):
     acessos = obter_total_acessos()

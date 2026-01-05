@@ -5,66 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ post[1] }} - Azul e Doido</title>
     <style>
+        /* CSS IDÊNTICO AO SEU INDEX PARA MANTER A ANIMAÇÃO */
         * { box-sizing: border-box; }
-        body { background-color: #0b1e33; color: white; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; line-height: 1.6; }
-        nav { background: #162a44; padding: 15px; text-align: center; border-bottom: 2px solid #00aaff; }
-        nav a { color: #00aaff; margin: 0 10px; text-decoration: none; font-weight: bold; }
-        
-        .layout { max-width: 900px; margin: auto; padding: 15px; }
-        
-        .post-completo { background: #1c3a5e; padding: 25px; border-radius: 10px; border-left: 5px solid #00aaff; }
-        .post-completo img, .post-completo iframe { max-width: 100% !important; height: auto !important; border-radius: 8px; }
-        .post-completo iframe { aspect-ratio: 16/9; width: 100% !important; }
-        
-        h1 { color: #00aaff; font-size: 2rem; margin-top: 0; }
-        .conteudo-texto { font-size: 1.1rem; word-wrap: break-word; }
-
-        .secao-comentarios { margin-top: 30px; background: #162a44; padding: 20px; border-radius: 10px; }
-        .comentario-item { border-bottom: 1px solid #2c4e7a; padding: 10px 0; }
-        
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #00aaff; background: #0b1e33; color: white; }
-        button { background: #00aaff; color: white; border: none; padding: 12px 20px; font-weight: bold; cursor: pointer; border-radius: 5px; width: 100%; }
-
-        @media (max-width: 768px) {
-            h1 { font-size: 1.5rem; }
-            .post-completo { padding: 15px; }
+        @keyframes coresDoidas {
+            0% { background-color: #001a33; }
+            50% { background-color: #004d99; }
+            100% { background-color: #001a33; }
         }
+        body { 
+            animation: coresDoidas 8s ease-in-out infinite;
+            color: #e6f2ff; font-family: sans-serif; margin: 0; padding: 0;
+            overflow-x: hidden; 
+        }
+        nav { 
+            display: flex; justify-content: center; gap: 20px; 
+            padding: 20px; background: #003366; border-bottom: 3px solid #00509e;
+        }
+        nav a { color: #ffffff; text-decoration: none; font-weight: bold; }
+        .layout { display: flex; max-width: 1100px; margin: 20px auto; padding: 0 15px; gap: 25px; width: 100%; }
+        main { flex: 2.5; min-width: 0; }
+        aside { 
+            flex: 1; background: #00264d; padding: 20px; border-radius: 10px; 
+            height: fit-content; min-width: 250px; border: 1px solid #004080;
+        }
+        .item { 
+            background: #00264d; padding: 25px; border-radius: 12px; 
+            border-left: 6px solid #007bff; word-wrap: break-word;
+        }
+        .post-title { color: #38bdf8; font-size: 2rem; font-weight: bold; margin-bottom: 10px; }
+        .post-date { color: #88aacc; display: block; margin-top: 15px; font-size: 0.8rem; }
+        .link-arquivo { display: block; color: #add8e6; text-decoration: none; padding: 10px; border-bottom: 1px solid #004080; }
+        .badge-count { background: #007bff; color: white; padding: 2px 8px; border-radius: 10px; float: right; }
+        
+        @media (max-width: 850px) { .layout { flex-direction: column; } aside { width: 100%; min-width: 100%; } }
     </style>
 </head>
 <body>
     <nav>
-        <a href="/">🏠 HOME</a>
+        <a href="/">🏠 BLOG</a>
         <a href="/mural">💬 MURAL</a>
+        <a href="/escrever">✍️ ESCREVER</a>
     </nav>
 
     <div class="layout">
-        <article class="post-completo">
-            <h1>{{ post[1] }}</h1>
-            <small style="color: #888;">📅 Publicado em: {{ post[3] }}</small>
-            <hr style="border: 0; border-top: 1px solid #162a44; margin: 20px 0;">
-            
-            <div class="conteudo-texto">
-                {{ post[2]|safe }}
-            </div>
-        </article>
-
-        <section class="secao-comentarios">
-            <h3>💬 Comentários</h3>
-            <form method="POST">
-                <input type="text" name="nome" placeholder="Seu nome" required>
-                <textarea name="comentario" rows="3" placeholder="Escreva seu comentário..." required></textarea>
-                <button type="submit">Enviar Comentário</button>
-            </form>
-
-            <div style="margin-top: 20px;">
-                {% for c in comentarios %}
-                <div class="comentario-item">
-                    <strong>{{ c[0] }}</strong> <small style="color: #888;">- {{ c[2] }}</small>
-                    <p style="margin: 5px 0;">{{ c[1] }}</p>
+        <main>
+            <div class="item">
+                <h1 class="post-title">{{ post[1] }}</h1>
+                <div style="line-height: 1.8; font-size: 1.1rem;">
+                    {{ post[2]|safe }}
                 </div>
-                {% endfor %}
+                <span class="post-date">📅 Postado em: {{ post[3] }}</span>
+                <hr style="border: 0; border-top: 1px dashed #004080; margin: 20px 0;">
+                <a href="/" style="color: #38bdf8; text-decoration: none; font-weight: bold;">← Voltar para a página inicial</a>
             </div>
-        </section>
+        </main>
+
+        <aside>
+            <h3 style="color: #38bdf8; margin-top: 0;">📅 ARQUIVO</h3>
+            {% for d in datas_arquivo %}
+            <a href="/arquivo/{{ d[0] }}/{{ d[1] }}" class="link-arquivo">
+                📁 {{ d[1] }}/{{ d[0] }} <span class="badge-count">{{ d[2] }}</span>
+            </a>
+            {% endfor %}
+        </aside>
     </div>
 </body>
 </html>
