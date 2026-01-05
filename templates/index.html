@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Azul e Doido - Blog</title>
     <style>
-        /* RESET GERAL */
+        /* RESET E CONFIGURAÇÃO BASE */
         * { box-sizing: border-box; }
         body { 
             background-color: #001a33; 
@@ -13,7 +13,7 @@
             font-family: sans-serif; 
             margin: 0; 
             padding: 0;
-            overflow-x: hidden; /* Evita rolagem lateral infinita */
+            overflow-x: hidden; 
         }
         
         nav { 
@@ -22,63 +22,73 @@
         }
         nav a { color: #ffffff; text-decoration: none; font-weight: bold; }
 
-        /* CONTAINER PRINCIPAL CENTRALIZADO */
+        /* LAYOUT CENTRALIZADO E TRAVADO */
         .layout { 
             display: flex; 
-            max-width: 1200px; /* Aumentei um pouco para caber melhor */
+            max-width: 1100px; 
             margin: 20px auto; 
-            padding: 0 20px; 
-            gap: 20px;
+            padding: 0 15px; 
+            gap: 25px;
+            width: 100%;
         }
 
-        /* COLUNA DOS POSTS */
+        /* COLUNA DOS POSTS - O segredo está aqui */
         main { 
-            flex: 3; 
-            min-width: 0; /* TRUQUE MÁGICO: impede o conteúdo de esticar a coluna */
+            flex: 2.5; 
+            min-width: 0; /* Impede que posts largos estiquem a coluna */
         }
 
-        /* BARRA LATERAL (ARQUIVO) */
+        /* BARRA LATERAL */
         aside { 
             flex: 1; 
             background: #00264d; 
-            padding: 15px; 
+            padding: 20px; 
             border-radius: 10px; 
             height: fit-content;
-            min-width: 200px; /* Garante que ela não fique esmagada */
+            min-width: 250px; /* Garante que o arquivo seja visível */
+            border: 1px solid #004080;
         }
 
         .contador-topo {
-            background: rgba(56, 189, 248, 0.1); padding: 10px;
-            border-radius: 8px; text-align: center; margin-bottom: 20px;
+            background: rgba(56, 189, 248, 0.1); padding: 12px;
+            border-radius: 8px; text-align: center; margin-bottom: 25px;
             border: 1px dashed #38bdf8; color: #38bdf8; font-weight: bold;
         }
 
+        /* CADA POST */
         .item { 
             background: #00264d; 
-            padding: 20px; 
-            border-radius: 10px; 
-            margin-bottom: 20px; 
-            border-left: 5px solid #007bff;
-            overflow-wrap: break-word; /* Força quebra de texto longo */
+            padding: 25px; 
+            border-radius: 12px; 
+            margin-bottom: 25px; 
+            border-left: 6px solid #007bff;
+            /* Força quebra de texto e evita transbordamento */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            overflow: hidden; 
         }
 
-        /* LIMITAR IMAGENS DENTRO DOS POSTS */
-        .item img {
-            max-width: 100%; /* Imagem nunca sai do quadrado azul */
-            height: auto;
-            border-radius: 5px;
+        /* FORÇAR IMAGENS E MÍDIA A CABEREM */
+        .item img, .item video, .item iframe {
+            max-width: 100% !important;
+            height: auto !important;
+            border-radius: 8px;
+            display: block;
+            margin: 15px 0;
         }
 
-        .post-title { color: #38bdf8; font-size: 1.4rem; text-decoration: none; font-weight: bold; }
-        .post-date { color: #ffffff !important; display: block; margin-top: 10px; font-weight: bold; }
+        .post-title { color: #38bdf8; font-size: 1.5rem; text-decoration: none; font-weight: bold; display: block; }
+        .post-date { color: #88aacc !important; display: block; margin-top: 15px; font-size: 0.9rem; }
         
         .badge-count { background: #007bff; color: white; padding: 2px 8px; border-radius: 10px; float: right; }
-        .link-arquivo { display: block; color: #add8e6; text-decoration: none; padding: 8px 0; border-bottom: 1px solid #004080; }
+        .link-arquivo { display: block; color: #add8e6; text-decoration: none; padding: 10px 0; border-bottom: 1px solid #004080; }
+        .link-arquivo:hover { color: #ffffff; }
 
-        /* RESPONSIVIDADE PARA CELULAR */
+        /* RESPONSIVIDADE */
         @media (max-width: 850px) { 
             .layout { flex-direction: column; } 
-            aside { width: 100%; }
+            aside { width: 100%; min-width: 100%; }
         }
     </style>
 </head>
@@ -95,13 +105,13 @@
                 👁️ {{ acessos if acessos else 0 }} VISUALIZAÇÕES
             </div>
 
-            <h1 style="color: #38bdf8;">📑 Publicações</h1>
+            <h1 style="color: #38bdf8; margin-bottom: 20px;">📑 Publicações</h1>
             
             {% if posts %}
                 {% for p in posts %}
                 <div class="item">
                     <a href="/post/{{ p[0] }}" class="post-title">{{ p[1] }}</a>
-                    <div style="margin-top:10px;">{{ p[2]|safe }}</div>
+                    <div style="margin-top:10px; line-height: 1.6;">{{ p[2]|safe }}</div>
                     <span class="post-date">📅 {{ p[3] }}</span>
                 </div>
                 {% endfor %}
