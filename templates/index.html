@@ -5,87 +5,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Azul e Doido - Blog</title>
     <style>
-        /* RESET E CORES AZUIS */
         * { box-sizing: border-box; }
-        body { 
-            background-color: #001a33; 
-            color: #e6f2ff; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; 
-        }
+        body { background-color: #001a33; color: #e6f2ff; font-family: sans-serif; margin: 0; padding: 0; }
         
-        /* NAV CENTRALIZADA */
         nav { 
-            display: flex; 
-            justify-content: center; 
-            gap: 25px; 
-            padding: 20px; 
-            background: #003366; 
-            border-bottom: 3px solid #00509e;
+            display: flex; justify-content: center; gap: 20px; 
+            padding: 20px; background: #003366; border-bottom: 3px solid #00509e;
         }
-        
-        nav a { color: #ffffff; text-decoration: none; font-weight: bold; font-size: 1.1rem; }
-        nav a:hover { color: #38bdf8; }
+        nav a { color: #ffffff; text-decoration: none; font-weight: bold; }
 
-        /* CONTADOR DE VISUALIZAÇÕES */
-        .contador-topo {
-            background: rgba(0, 123, 255, 0.2);
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 20px;
-            border: 1px dashed #38bdf8;
-            color: #38bdf8;
-        }
-
-        /* LAYOUT UNIFORME */
         .layout { 
-            display: flex; 
-            max-width: 1100px; 
-            margin: 30px auto; 
-            padding: 0 20px; 
-            gap: 25px; 
+            display: flex; max-width: 1100px; margin: 20px auto; 
+            padding: 0 20px; gap: 20px;
         }
 
-        main { flex: 3; min-width: 0; }
-        
-        aside { 
-            flex: 1; 
-            background: #00264d; 
-            padding: 20px; 
-            border-radius: 10px; 
-            height: fit-content;
-            border: 1px solid #004080;
+        main { flex: 3; }
+        aside { flex: 1; background: #00264d; padding: 15px; border-radius: 10px; height: fit-content; }
+
+        .contador-topo {
+            background: rgba(56, 189, 248, 0.1); padding: 10px;
+            border-radius: 8px; text-align: center; margin-bottom: 20px;
+            border: 1px dashed #38bdf8; color: #38bdf8; font-weight: bold;
         }
 
-        /* ITENS DOS POSTS */
         .item { 
-            background: #00264d; 
-            padding: 25px; 
-            border-radius: 12px; 
-            margin-bottom: 25px; 
-            border-left: 6px solid #007bff; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: #00264d; padding: 20px; border-radius: 10px; 
+            margin-bottom: 20px; border-left: 5px solid #007bff;
         }
 
-        .post-title { 
-            color: #38bdf8; 
-            font-size: 1.6rem; 
-            text-decoration: none; 
-            display: block; 
-            margin-bottom: 15px; 
-        }
+        .post-title { color: #38bdf8; font-size: 1.4rem; text-decoration: none; font-weight: bold; }
+        .post-date { color: #ffffff !important; display: block; margin-top: 10px; font-weight: bold; }
         
-        .post-date { 
-            color: #ffffff !important; 
-            font-weight: bold; 
-            text-shadow: 1px 1px 3px #000; 
-            margin-top: 15px; 
-            display: block; 
-        }
+        .badge-count { background: #007bff; color: white; padding: 2px 8px; border-radius: 10px; float: right; }
+        .link-arquivo { display: block; color: #add8e6; text-decoration: none; padding: 8px 0; border-bottom: 1px solid #004080; }
 
-        .badge-count { 
-            background: #007bff; 
-            color: #ffffff; 
-            padding:
+        @media (max-width: 768px) { .layout { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">🏠 BLOG</a>
+        <a href="/mural">💬 MURAL</a>
+        <a href="/escrever">✍️ POST</a>
+    </nav>
+
+    <div class="layout">
+        <main>
+            <div class="contador-topo">
+                👁️ {{ acessos if acessos else 0 }} VISUALIZAÇÕES
+            </div>
+
+            <h1 style="color: #38bdf8;">📑 Publicações</h1>
+            
+            {% if posts %}
+                {% for p in posts %}
+                <div class="item">
+                    <a href="/post/{{ p[0] }}" class="post-title">{{ p[1] }}</a>
+                    <div style="margin-top:10px;">{{ p[2]|safe }}</div>
+                    <span class="post-date">📅 {{ p[3] }}</span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="item">
+                    <p>Nenhum post encontrado. Sincronize o banco!</p>
+                </div>
+            {% endif %}
+        </main>
+
+        <aside>
+            <h3 style="color: #38bdf8; margin-top: 0;">📅 ARQUIVO</h3>
+            {% if datas_arquivo %}
+                {% for d in datas_arquivo %}
+                <a href="/arquivo/{{ d[0] }}/{{ d[1] }}" class="link-arquivo">
+                    📁 {{ d[1] }}/{{ d[0] }} 
+                    <span class="badge-count">{{ d[2] }}</span>
+                </a>
+                {% endfor %}
+            {% else %}
+                <p>Vazio.</p>
+            {% endif %}
+        </aside>
+    </div>
+</body>
+</html>
