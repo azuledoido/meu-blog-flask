@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-    <title>Mural</title>
+    <meta charset="UTF-8">
+    <title>Mural - Azul e Doido</title>
     <style>
-        body { background-color: #001a33; color: white; font-family: sans-serif; padding: 20px; }
-        nav { margin-bottom: 20px; }
-        nav a { color: #38bdf8; margin-right: 15px; text-decoration: none; font-weight: bold; }
-        .recado { border-bottom: 1px solid #00509e; padding: 10px 0; }
-        .autor { color: #38bdf8; font-weight: bold; }
+        body { background-color: #001a33; color: #e6f2ff; font-family: sans-serif; text-align: center; padding: 50px; }
+        nav { background: #003366; padding: 20px; margin-bottom: 20px; }
+        nav a { color: white; margin: 0 15px; text-decoration: none; font-weight: bold; }
+        .box { background: #00264d; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; border: 1px solid #007bff; }
+        input, textarea { width: 90%; margin: 10px 0; padding: 10px; border-radius: 5px; border: none; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -17,22 +19,28 @@
     </nav>
 
     <h1>💬 Mural de Recados</h1>
-    
-    <form action="/mural" method="POST" style="margin-bottom: 30px;">
-        <input type="text" name="nome" placeholder="Nome" required style="display:block; margin-bottom:10px;">
-        <textarea name="mensagem" placeholder="Mensagem" required style="display:block; margin-bottom:10px;"></textarea>
-        <button type="submit">Enviar</button>
-    </form>
 
-    {% if recados %}
-        {% for r in recados %}
-        <div class="recado">
-            <span class="autor">{{ r[1] }}</span>
-            <p>{{ r[2] }}</p>
-        </div>
-        {% endfor %}
-    {% else %}
-        <p>Ainda não há recados.</p>
-    {% endif %}
+    <div class="box">
+        <form action="/mural" method="POST">
+            <input type="text" name="nome" placeholder="Seu nome" required>
+            <textarea name="mensagem" placeholder="Sua mensagem" required></textarea>
+            <br>
+            <button type="submit">Enviar Recado</button>
+        </form>
+    </div>
+
+    <hr style="margin: 40px 0; border: 0; border-top: 1px solid #00509e;">
+
+    <div style="max-width: 600px; margin: auto; text-align: left;">
+        {% if recados %}
+            {% for r in recados %}
+                <div style="background: #00264d; padding: 15px; margin-bottom: 10px; border-radius: 8px;">
+                    <b style="color: #38bdf8;">{{ r[1] }}</b>: {{ r[2] }}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center;">Ainda não há recados.</p>
+        {% endif %}
+    </div>
 </body>
 </html>
