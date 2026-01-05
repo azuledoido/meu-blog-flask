@@ -7,6 +7,38 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
+        /* CORREÇÃO DO TOPO: Centraliza os botões novamente */
+        nav {
+            display: flex !important;
+            justify-content: center !important;
+            gap: 20px;
+            padding: 15px;
+            width: 100%;
+        }
+
+        /* CORREÇÃO DO LAYOUT: Garante Main na esquerda e Sidebar na direita */
+        .layout {
+            display: flex !important;
+            flex-direction: row;
+            gap: 20px;
+            max-width: 1100px;
+            margin: 0 auto;
+            align-items: flex-start;
+        }
+
+        .conteudo {
+            flex: 3;
+        }
+
+        .sidebar {
+            flex: 1;
+            min-width: 220px;
+            background: rgba(255, 255, 255, 0.05); /* Leve fundo para visibilidade */
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        /* Badges e Links do Arquivo */
         .badge-count {
             background-color: #007bff;
             color: white;
@@ -16,6 +48,7 @@
             font-weight: bold;
             float: right;
         }
+
         .link-arquivo {
             display: block;
             padding: 8px;
@@ -23,11 +56,14 @@
             color: inherit;
             border-radius: 5px;
             transition: background 0.3s;
+            clear: both; /* Garante que o badge não quebre a linha */
         }
+
         .link-arquivo:hover {
             background-color: rgba(0, 123, 255, 0.1);
             color: #007bff;
         }
+
         .post-date {
             color: #ffffff; 
             font-weight: bold;
@@ -37,66 +73,13 @@
             margin-top: 10px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
         }
+
         .item {
             margin-bottom: 30px;
             padding: 15px;
             border-left: 4px solid transparent;
             transition: border-color 0.3s;
         }
+
         .item:hover {
-            border-left: 4px solid #007bff;
-        }
-        .divisor {
-            border: 0;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            margin: 10px 0;
-        }
-    </style>
-</head>
-<body>
-    <nav>
-        <a href="/">🏠 BLOG</a>
-        <a href="/mural">💬 MURAL</a>
-        <a href="/escrever">✍️ POST</a>
-    </nav>
-
-    <div class="layout">
-        <main class="conteudo">
-            <div class="contador-topo">
-                👁️ {{ acessos }} VISUALIZAÇÕES
-            </div>
-
-            <h1>📑 Publicações ({{ posts|length if posts else 0 }})</h1>
-            
-            {% if posts %}
-                {% for p in posts %}
-                <div class="item">
-                    <a href="/post/{{ p[0] }}" class="post-title">{{ p[1] }}</a>
-                    <div class="post-body">{{ p[2]|safe }}</div>
-                    <hr class="divisor">
-                    <div class="post-date">📅 {{ p[3] }}</div>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="item">
-                    <p>Nenhuma publicação encontrada no momento.</p>
-                </div>
-            {% endif %}
-        </main>
-
-        <aside class="sidebar">
-            <h3>📅 ARQUIVO</h3>
-            {% if datas_arquivo %}
-                {% for d in datas_arquivo %}
-                <a href="/arquivo/{{ d[0] }}/{{ d[1] }}" class="link-arquivo">
-                    📁 {{ "%02d" % d[1] }}/{{ d[0] }} 
-                    <span class="badge-count">{{ d[2] }}</span>
-                </a>
-                {% endfor %}
-            {% else %}
-                <p>Sem arquivos.</p>
-            {% endif %}
-        </aside>
-    </div>
-</body>
-</html>
+            border-
