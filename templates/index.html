@@ -5,104 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Azul e Doido - Blog</title>
     <style>
-        /* ESTILO DE EMERGÊNCIA - Ignora arquivos externos bugados */
-        body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, sans-serif; margin: 0; }
+        /* RESET E CORES AZUIS */
+        * { box-sizing: border-box; }
+        body { 
+            background-color: #001a33; 
+            color: #e6f2ff; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+        }
         
+        /* NAV CENTRALIZADA */
         nav { 
             display: flex; 
             justify-content: center; 
-            gap: 20px; 
+            gap: 25px; 
             padding: 20px; 
-            background: #1e293b; 
-            border-bottom: 2px solid #334155;
+            background: #003366; 
+            border-bottom: 3px solid #00509e;
         }
         
-        nav a { color: #38bdf8; text-decoration: none; font-weight: bold; font-size: 1.1rem; }
+        nav a { color: #ffffff; text-decoration: none; font-weight: bold; font-size: 1.1rem; }
+        nav a:hover { color: #38bdf8; }
 
+        /* CONTADOR DE VISUALIZAÇÕES */
+        .contador-topo {
+            background: rgba(0, 123, 255, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border: 1px dashed #38bdf8;
+            color: #38bdf8;
+        }
+
+        /* LAYOUT UNIFORME */
         .layout { 
             display: flex; 
             max-width: 1100px; 
-            margin: 20px auto; 
+            margin: 30px auto; 
             padding: 0 20px; 
-            gap: 30px;
+            gap: 25px; 
         }
 
-        main { flex: 3; }
+        main { flex: 3; min-width: 0; }
         
         aside { 
             flex: 1; 
-            background: #1e293b; 
+            background: #00264d; 
             padding: 20px; 
-            border-radius: 12px; 
+            border-radius: 10px; 
             height: fit-content;
+            border: 1px solid #004080;
         }
 
+        /* ITENS DOS POSTS */
         .item { 
-            background: #1e293b; 
-            padding: 20px; 
+            background: #00264d; 
+            padding: 25px; 
             border-radius: 12px; 
-            margin-bottom: 20px; 
-            border-left: 5px solid #38bdf8;
+            margin-bottom: 25px; 
+            border-left: 6px solid #007bff; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .post-title { color: #f1f5f9; font-size: 1.5rem; text-decoration: none; display: block; margin-bottom: 10px; }
+        .post-title { 
+            color: #38bdf8; 
+            font-size: 1.6rem; 
+            text-decoration: none; 
+            display: block; 
+            margin-bottom: 15px; 
+        }
         
-        .post-date { color: #ffffff; font-weight: bold; text-shadow: 1px 1px 2px #000; margin-top: 15px; display: block; }
+        .post-date { 
+            color: #ffffff !important; 
+            font-weight: bold; 
+            text-shadow: 1px 1px 3px #000; 
+            margin-top: 15px; 
+            display: block; 
+        }
 
         .badge-count { 
-            background: #38bdf8; 
-            color: #0f172a; 
-            padding: 2px 10px; 
-            border-radius: 20px; 
-            font-weight: bold; 
-            float: right; 
-        }
-
-        .link-arquivo { 
-            display: block; 
-            color: #94a3b8; 
-            text-decoration: none; 
-            padding: 10px 0; 
-            border-bottom: 1px solid #334155; 
-        }
-    </style>
-</head>
-<body>
-    <nav>
-        <a href="/">🏠 BLOG</a>
-        <a href="/mural">💬 MURAL</a>
-        <a href="/escrever">✍️ POST</a>
-    </nav>
-
-    <div class="layout">
-        <main>
-            <h1>📑 Publicações ({{ posts|length if posts else 0 }})</h1>
-            {% if posts %}
-                {% for p in posts %}
-                <div class="item">
-                    <a href="/post/{{ p[0] }}" class="post-title">{{ p[1] }}</a>
-                    <div class="post-body">{{ p[2]|safe }}</div>
-                    <span class="post-date">📅 {{ p[3] }}</span>
-                </div>
-                {% endfor %}
-            {% else %}
-                <p>Nenhum post encontrado. Sincronize o banco de dados!</p>
-            {% endif %}
-        </main>
-
-        <aside>
-            <h3>📅 ARQUIVO</h3>
-            {% if datas_arquivo %}
-                {% for d in datas_arquivo %}
-                <a href="/arquivo/{{ d[0] }}/{{ d[1] }}" class="link-arquivo">
-                    📁 {{ "%02d" % d[1] }}/{{ d[0] }} 
-                    <span class="badge-count">{{ d[2] }}</span>
-                </a>
-                {% endfor %}
-            {% else %}
-                <p>Sem arquivos.</p>
-            {% endif %}
-        </aside>
-    </div>
-</body>
-</html>
+            background: #007bff; 
+            color: #ffffff; 
+            padding:
