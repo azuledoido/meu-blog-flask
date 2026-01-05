@@ -12,7 +12,8 @@ def get_db_connection():
         if url and "sslmode" not in url:
             url += "&sslmode=require" if "?" in url else "?sslmode=require"
         return psycopg2.connect(url)
-    except:
+    except Exception as e:
+        print(f"Erro de conexão: {e}")
         return None
 
 def obter_total_acessos():
@@ -39,46 +40,49 @@ def obter_arquivo_datas():
         cur = conn.cursor()
         cur.execute("""
             SELECT 
-                EXTRACT(YEAR FROM data_criacao)::int as ano, 
-                EXTRACT(MONTH FROM data_criacao)::int as mes, 
-                COUNT(*) 
+                EXTRACT(YEAR FROM COALESCE(data_criacao, NOW()))::int, 
+                EXTRACT(MONTH FROM COALESCE(data_criacao, NOW()))::int, 
+                COUNT(*)::int
             FROM posts 
-            GROUP BY ano, mes 
-            ORDER BY ano DESC, mes DESC;
+            GROUP BY 1, 2 
+            ORDER BY 1 DESC, 2 DESC;
         """)
         datas = cur.fetchall()
         cur.close()
         conn.close()
         return datas
-    except:
+    except Exception as e:
+        print(f"Erro ao obter datas: {e}")
         return []
 
 @app.route('/')
 def home():
     acessos = obter_total_acessos()
-    datas = obter_arquivo_datas()
+    datas_arquivo = obter_arquivo_datas()
     posts = []
     try:
         conn = get_db_connection()
         if conn:
             cur = conn.cursor()
+            # Ordem correta na Home
             cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY id DESC;")
             posts = cur.fetchall()
             cur.close()
             conn.close()
     except:
         pass
-    return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas)
+    return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
 
 @app.route('/arquivo/<int:ano>/<int:mes>')
 def arquivo(ano, mes):
     acessos = obter_total_acessos()
-    datas = obter_arquivo_datas()
+    datas_arquivo = obter_arquivo_datas()
     posts = []
     try:
         conn = get_db_connection()
         if conn:
             cur = conn.cursor()
+            # AGORA FORÇANDO A ORDEM DESC NESTA CONSULTA TAMBÉM
             cur.execute("""
                 SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') 
                 FROM posts 
@@ -91,7 +95,7 @@ def arquivo(ano, mes):
             conn.close()
     except:
         pass
-    return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas)
+    return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
 
 @app.route('/mural', methods=['GET', 'POST'])
 def mural():
@@ -132,4 +136,6 @@ def escrever():
     return render_template('escrever.html')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    # Porta corrigida para o Render (geralmente usa a porta da variável de ambiente PORT)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
