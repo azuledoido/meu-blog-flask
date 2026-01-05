@@ -50,6 +50,7 @@ def home():
     acessos = obter_total_acessos()
     conn = get_db_connection()
     cur = conn.cursor()
+    # ORDENAÇÃO CORRIGIDA: Data mais nova primeiro, e ID maior (mais recente) para desempatar
     cur.execute("""
         SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') 
         FROM posts 

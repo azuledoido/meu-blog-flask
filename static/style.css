@@ -1,35 +1,27 @@
-/* Estilo Azul e Doido - Versão Pop!_OS */
-body {
-    background-color: #0d1117;
-    color: #c9d1d9;
-    font-family: 'Inter', -apple-system, sans-serif;
-    margin: 0;
-    padding: 0;
+/* Reset e Base */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background-color: #0b1e33; color: white; font-family: sans-serif; line-height: 1.6; }
+
+/* Navegação */
+nav { background: #162a44; padding: 15px; text-align: center; border-bottom: 2px solid #00aaff; }
+nav a { color: #00aaff; margin: 0 10px; text-decoration: none; font-weight: bold; }
+
+/* Layout principal */
+.layout { max-width: 1200px; margin: auto; padding: 15px; }
+
+/* Posts */
+.item { background: #1c3a5e; padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 5px solid #00aaff; word-wrap: break-word; }
+.post-title { color: #00aaff; text-decoration: none; font-size: 1.5rem; font-weight: bold; display: block; margin-bottom: 10px; }
+.post-body img, .post-body iframe { max-width: 100% !important; height: auto !important; border-radius: 8px; }
+
+/* Contador e Sidebar */
+.contador-topo { text-align: center; padding: 12px; background: #162a44; border-radius: 10px; border: 1px solid #00aaff; margin-bottom: 20px; color: #00aaff; font-weight: bold; }
+.sidebar { background: #162a44; padding: 20px; border-radius: 10px; border: 1px solid #00aaff; }
+.link-arquivo { display: block; color: #00aaff; margin: 10px 0; text-decoration: none; }
+
+/* Ajuste Responsivo (Celular) */
+@media (min-width: 768px) {
+    .layout { display: flex; gap: 20px; }
+    .conteudo { flex: 3; }
+    .sidebar { width: 250px; }
 }
-
-.container {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 20px;
-}
-
-.post {
-    background: #161b22;
-    border: 1px solid #30363d;
-    border-radius: 8px;
-    padding: 25px;
-    margin-bottom: 20px;
-}
-
-h1, h2 { color: #58a6ff; }
-
-/* Ajuste para as fotos do Neto Alves não quebrarem a tela */
-img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 6px;
-    margin: 15px 0;
-}
-
-a { color: #1f6feb; text-decoration: none; }
-a:hover { text-decoration: underline; }

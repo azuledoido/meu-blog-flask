@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build: .
@@ -9,12 +7,16 @@ services:
     depends_on:
       - pgdb
       - redis
+    volumes:
+      - .:/app
     environment:
       - DATABASE_URL=postgresql://azuledoido:123@pgdb:5432/meubanco
       - REDIS_URL=redis://redis:6379/0
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
 
   pgdb:
-    image: postgres:15
+    image: postgres:18
     container_name: estudos_docker-pgdb-1
     environment:
       POSTGRES_USER: azuledoido
@@ -23,7 +25,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - /home/azul/postgres_data_segura:/var/lib/postgresql/data
+      # AJUSTE: Removemos o '/data' para o Postgres 18 gerenciar a estrutura interna
+      - /home/azul/postgres_data_v18:/var/lib/postgresql
 
   redis:
     image: redis:alpine
