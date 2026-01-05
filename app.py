@@ -50,7 +50,6 @@ def home():
     acessos = obter_total_acessos()
     conn = get_db_connection()
     cur = conn.cursor()
-    # ORDENAÇÃO CORRIGIDA: Data mais nova primeiro, e ID maior (mais recente) para desempatar
     cur.execute("""
         SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') 
         FROM posts 
@@ -62,47 +61,22 @@ def home():
     conn.close()
     return render_template('index.html', posts=posts, datas_arquivo=datas, acessos=acessos)
 
-@app.route('/arquivo/<int:ano>/<int:mes>')
-def arquivo(ano, mes):
-    acessos = obter_total_acessos()
-    datas = obter_arquivo_datas()
+# --- ROTA DO MURAL ADICIONADA AQUI ---
+@app.route('/mural', methods=['GET', 'POST'])
+def mural():
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("""
-        SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') 
-        FROM posts 
-        WHERE EXTRACT(YEAR FROM data_criacao) = %s 
-          AND EXTRACT(MONTH FROM data_criacao) = %s 
-        ORDER BY data_criacao DESC, id DESC;
-    """, (ano, mes))
-    posts = cur.fetchall()
-    cur.close()
-    conn.close()
-    return render_template('index.html', posts=posts, datas_arquivo=datas, acessos=acessos)
-
-@app.route('/post/<int:post_id>')
-def exibir_post(post_id):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE id = %s;", (post_id,))
-    post = cur.fetchone()
-    cur.close()
-    conn.close()
-    return render_template('post_unico.html', post=post)
-
-@app.route('/escrever', methods=['GET', 'POST'])
-def escrever():
+    
     if request.method == 'POST':
-        if request.form.get('senha_adm') == SENHA_ADM:
-            t, c = request.form['titulo'], request.form['conteudo']
-            conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute('INSERT INTO posts (titulo, conteudo) VALUES (%s, %s);', (t, c))
+        nome = request.form.get('nome')
+        mensagem = request.form.get('mensagem')
+        if nome and mensagem:
+            cur.execute("INSERT INTO mural (nome, mensagem) VALUES (%s, %s)", (nome, mensagem))
             conn.commit()
-            cur.close()
-            conn.close()
-            return redirect(url_for('home'))
-    return render_template('escrever.html')
+        return redirect(url_for('mural'))
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    try:
+        cur.execute("SELECT id, nome, mensagem, TO_CHAR(data, 'DD/MM/YYYY HH24:MI') FROM mural ORDER BY id DESC")
+        recados = cur.fetchall()
+    except:
+        recados = []
