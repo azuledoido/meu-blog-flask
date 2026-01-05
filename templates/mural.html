@@ -1,13 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-    <title>Mural Teste</title>
+    <meta charset="UTF-8">
+    <title>Mural - Azul e Doido</title>
+    <style>
+        body { background-color: #001a33; color: #e6f2ff; font-family: sans-serif; margin: 0; }
+        nav { display: flex; justify-content: center; gap: 20px; padding: 20px; background: #003366; border-bottom: 3px solid #00509e; }
+        nav a { color: #ffffff; text-decoration: none; font-weight: bold; }
+        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+        .form-mural { background: #00264d; padding: 20px; border-radius: 10px; border: 1px solid #007bff; margin-bottom: 30px; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; background: #001a33; border: 1px solid #00509e; color: white; border-radius: 5px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .recado { background: #00264d; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid #38bdf8; }
+    </style>
 </head>
-<body style="background-color: #001a33; color: white; font-family: sans-serif;">
+<body>
     <nav>
-        <a href="/" style="color: cyan;">VOLTAR PARA O BLOG</a>
+        <a href="/">🏠 BLOG</a>
+        <a href="/mural">💬 MURAL</a>
     </nav>
-    <h1>TESTE DE EMERGÊNCIA</h1>
-    <p>Se você está lendo isso, o problema é a conexão com o banco de dados no app.py.</p>
+
+    <div class="container">
+        <h1 style="color: #38bdf8;">💬 Mural de Recados</h1>
+        
+        <div class="form-mural">
+            <form action="/mural" method="POST">
+                <input type="text" name="nome" placeholder="Seu nome" required>
+                <textarea name="mensagem" placeholder="Deixe um recado..." rows="3" required></textarea>
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+
+        {% for r in recados %}
+        <div class="recado">
+            <strong style="color: #38bdf8;">{{ r[1] }}</strong>
+            <p>{{ r[2] }}</p>
+        </div>
+        {% endfor %}
+    </div>
 </body>
 </html>
