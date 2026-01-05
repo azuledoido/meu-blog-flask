@@ -16,7 +16,7 @@
         }
 
         body { 
-            animation: coresDoidas 8s ease-in-out infinite; /* Mais rápido para você notar */
+            animation: coresDoidas 8s ease-in-out infinite;
             color: #e6f2ff; 
             font-family: sans-serif; 
             margin: 0; 
@@ -87,9 +87,20 @@
         }
         .link-arquivo:hover { background: #003366; padding-left: 15px; color: #38bdf8; }
 
+        /* --- FORÇA BRUTA PARA RESPONSIVIDADE (IMAGENS E VÍDEOS) --- */
+        .item img, .item video, .item iframe {
+            max-width: 100% !important;
+            height: auto !important;
+            border-radius: 8px;
+            display: block;
+            margin: 15px auto;
+        }
+
         @media (max-width: 850px) { 
             .layout { flex-direction: column; } 
             aside { width: 100%; min-width: 100%; }
+            /* Garante que no mobile nada escape mesmo */
+            .item { padding: 15px; }
         }
     </style>
 </head>
