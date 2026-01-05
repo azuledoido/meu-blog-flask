@@ -1,19 +1,12 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mural - Azul e Doido</title>
+    <title>Mural</title>
     <style>
-        * { box-sizing: border-box; }
-        body { background-color: #001a33; color: #e6f2ff; font-family: sans-serif; margin: 0; padding: 0; }
-        nav { display: flex; justify-content: center; gap: 20px; padding: 20px; background: #003366; border-bottom: 3px solid #00509e; }
-        nav a { color: #ffffff; text-decoration: none; font-weight: bold; }
-        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
-        .form-mural { background: #00264d; padding: 20px; border-radius: 10px; border: 1px solid #007bff; margin-bottom: 30px; }
-        input, textarea { width: 100%; padding: 10px; margin: 10px 0; background: #001a33; border: 1px solid #00509e; color: white; border-radius: 5px; }
-        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .recado { background: #00264d; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid #38bdf8; }
+        body { background-color: #001a33; color: white; font-family: sans-serif; padding: 20px; }
+        nav { margin-bottom: 20px; }
+        nav a { color: #38bdf8; margin-right: 15px; text-decoration: none; font-weight: bold; }
+        .recado { border-bottom: 1px solid #00509e; padding: 10px 0; }
         .autor { color: #38bdf8; font-weight: bold; }
     </style>
 </head>
@@ -21,32 +14,25 @@
     <nav>
         <a href="/">🏠 BLOG</a>
         <a href="/mural">💬 MURAL</a>
-        <a href="/escrever">✍️ POST</a>
     </nav>
 
-    <div class="container">
-        <h1 style="color: #38bdf8;">💬 Mural</h1>
-        
-        <div class="form-mural">
-            <form action="/mural" method="POST">
-                <input type="text" name="nome" placeholder="Seu nome" required>
-                <textarea name="mensagem" placeholder="Sua mensagem..." rows="3" required></textarea>
-                <button type="submit">Enviar</button>
-            </form>
-        </div>
+    <h1>💬 Mural de Recados</h1>
+    
+    <form action="/mural" method="POST" style="margin-bottom: 30px;">
+        <input type="text" name="nome" placeholder="Nome" required style="display:block; margin-bottom:10px;">
+        <textarea name="mensagem" placeholder="Mensagem" required style="display:block; margin-bottom:10px;"></textarea>
+        <button type="submit">Enviar</button>
+    </form>
 
-        <div class="lista-recados">
-            {% if recados %}
-                {% for r in recados %}
-                <div class="recado">
-                    <span class="autor">{{ r[1] }}</span>
-                    <p>{{ r[2] }}</p>
-                </div>
-                {% endfor %}
-            {% else %}
-                <p>Nenhum recado ainda. Seja o primeiro!</p>
-            {% endif %}
+    {% if recados %}
+        {% for r in recados %}
+        <div class="recado">
+            <span class="autor">{{ r[1] }}</span>
+            <p>{{ r[2] }}</p>
         </div>
-    </div>
+        {% endfor %}
+    {% else %}
+        <p>Ainda não há recados.</p>
+    {% endif %}
 </body>
 </html>
