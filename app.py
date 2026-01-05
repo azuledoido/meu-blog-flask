@@ -64,8 +64,12 @@ def home():
         conn = get_db_connection()
         if conn:
             cur = conn.cursor()
-            # Ordem correta na Home
-            cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY id DESC;")
+            # Ordenação dupla para garantir que o mais novo venha primeiro
+            cur.execute("""
+                SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') 
+                FROM posts 
+                ORDER BY data_criacao DESC, id DESC;
+            """)
             posts = cur.fetchall()
             cur.close()
             conn.close()
@@ -82,13 +86,13 @@ def arquivo(ano, mes):
         conn = get_db_connection()
         if conn:
             cur = conn.cursor()
-            # AGORA FORÇANDO A ORDEM DESC NESTA CONSULTA TAMBÉM
+            # Filtro por data E ordenação dupla DESC
             cur.execute("""
                 SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') 
                 FROM posts 
                 WHERE EXTRACT(YEAR FROM data_criacao) = %s 
                 AND EXTRACT(MONTH FROM data_criacao) = %s
-                ORDER BY id DESC;
+                ORDER BY data_criacao DESC, id DESC;
             """, (ano, mes))
             posts = cur.fetchall()
             cur.close()
@@ -97,45 +101,4 @@ def arquivo(ano, mes):
         pass
     return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
 
-@app.route('/mural', methods=['GET', 'POST'])
-def mural():
-    recados = []
-    try:
-        conn = get_db_connection()
-        if conn:
-            cur = conn.cursor()
-            if request.method == 'POST':
-                nome = request.form.get('nome')
-                mensagem = request.form.get('mensagem')
-                if nome and mensagem:
-                    cur.execute("INSERT INTO mural (nome, mensagem) VALUES (%s, %s)", (nome, mensagem))
-                    conn.commit()
-                return redirect(url_for('mural'))
-            
-            cur.execute("SELECT id, nome, mensagem, TO_CHAR(data, 'DD/MM/YYYY HH24:MI') FROM mural ORDER BY id DESC LIMIT 50")
-            recados = cur.fetchall()
-            cur.close()
-            conn.close()
-    except:
-        pass
-    return render_template('mural.html', recados=recados)
-
-@app.route('/escrever', methods=['GET', 'POST'])
-def escrever():
-    if request.method == 'POST':
-        if request.form.get('senha_adm') == SENHA_ADM:
-            t, c = request.form['titulo'], request.form['conteudo']
-            conn = get_db_connection()
-            if conn:
-                cur = conn.cursor()
-                cur.execute('INSERT INTO posts (titulo, conteudo) VALUES (%s, %s);', (t, c))
-                conn.commit()
-                cur.close()
-                conn.close()
-                return redirect(url_for('home'))
-    return render_template('escrever.html')
-
-if __name__ == '__main__':
-    # Porta corrigida para o Render (geralmente usa a porta da variável de ambiente PORT)
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+@app
