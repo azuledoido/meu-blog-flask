@@ -39,12 +39,12 @@ def obter_arquivo_datas():
         cur = conn.cursor()
         cur.execute("""
             SELECT 
-                EXTRACT(YEAR FROM COALESCE(data_criacao, NOW()))::int, 
-                EXTRACT(MONTH FROM COALESCE(data_criacao, NOW()))::int, 
+                EXTRACT(YEAR FROM data_criacao)::int as ano, 
+                EXTRACT(MONTH FROM data_criacao)::int as mes, 
                 COUNT(*) 
             FROM posts 
-            GROUP BY 1, 2 
-            ORDER BY 1 DESC, 2 DESC;
+            GROUP BY ano, mes 
+            ORDER BY ano DESC, mes DESC;
         """)
         datas = cur.fetchall()
         cur.close()
@@ -70,6 +70,29 @@ def home():
         pass
     return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas)
 
+@app.route('/arquivo/<int:ano>/<int:mes>')
+def arquivo(ano, mes):
+    acessos = obter_total_acessos()
+    datas = obter_arquivo_datas()
+    posts = []
+    try:
+        conn = get_db_connection()
+        if conn:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') 
+                FROM posts 
+                WHERE EXTRACT(YEAR FROM data_criacao) = %s 
+                AND EXTRACT(MONTH FROM data_criacao) = %s
+                ORDER BY id DESC;
+            """, (ano, mes))
+            posts = cur.fetchall()
+            cur.close()
+            conn.close()
+    except:
+        pass
+    return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas)
+
 @app.route('/mural', methods=['GET', 'POST'])
 def mural():
     recados = []
@@ -84,13 +107,8 @@ def mural():
                     cur.execute("INSERT INTO mural (nome, mensagem) VALUES (%s, %s)", (nome, mensagem))
                     conn.commit()
                 return redirect(url_for('mural'))
-
-            try:
-                cur.execute("SELECT id, nome, mensagem, TO_CHAR(data, 'DD/MM/YYYY HH24:MI') FROM mural ORDER BY id DESC LIMIT 50")
-            except:
-                if conn: conn.rollback()
-                cur.execute("SELECT id, nome, mensagem FROM mural ORDER BY id DESC LIMIT 50")
             
+            cur.execute("SELECT id, nome, mensagem, TO_CHAR(data, 'DD/MM/YYYY HH24:MI') FROM mural ORDER BY id DESC LIMIT 50")
             recados = cur.fetchall()
             cur.close()
             conn.close()
