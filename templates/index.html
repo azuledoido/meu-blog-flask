@@ -64,7 +64,57 @@
 
         .item:hover { transform: translateX(5px); border-left-color: #38bdf8; }
 
-        .post-title { color: #38bdf8; font-size: 1.5rem; text-decoration: none; font-weight: bold; }
+        .post-title { color: #38bdf8; font-size: 1.5rem; text-decoration: none; font-weight: bold; display: block; }
         .post-date { color: #88aacc; display: block; margin-top: 15px; font-size: 0.8rem; }
         
-        .badge-count { background: #007bff; color: white; padding: 2
+        .badge-count { background: #007bff; color: white; padding: 2px 8px; border-radius: 10px; float: right; }
+        
+        .link-arquivo { 
+            display: block; color: #add8e6; text-decoration: none; padding: 10px; 
+            border-bottom: 1px solid #004080;
+        }
+
+        @media (max-width: 850px) { 
+            .layout { flex-direction: column; } 
+            aside { width: 100%; min-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">🏠 BLOG</a>
+        <a href="/mural">💬 MURAL</a>
+        <a href="/escrever">✍️ ESCREVER</a>
+    </nav>
+
+    <div class="layout">
+        <main>
+            <div class="contador-topo">
+                👁️ {{ acessos }} ACESSOS
+            </div>
+
+            <h1 style="color: #38bdf8; margin-bottom: 20px;">📑 Publicações</h1>
+
+            {% if posts %}
+                {% for p in posts %}
+                <div class="item">
+                    <a href="/post/{{ p[0] }}" class="post-title">{{ p[1] }}</a>
+                    <div style="margin-top:15px; line-height: 1.6;">{{ p[2]|safe }}</div>
+                    <span class="post-date">📅 {{ p[3] }}</span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="item">
+                    <h2 style="color: #38bdf8;">O BANCO ESTÁ VAZIO!</h2>
+                    <p>Use a página /escrever para criar o primeiro post.</p>
+                </div>
+            {% endif %}
+        </main>
+
+        <aside>
+            <h3 style="color: #38bdf8; margin-top: 0;">📅 ARQUIVO</h3>
+            <p style="font-size: 0.9rem; color: #88aacc;">Navegue pelas datas das postagens.</p>
+            </aside>
+    </div>
+</body>
+</html>
