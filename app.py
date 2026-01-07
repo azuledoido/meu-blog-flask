@@ -5,10 +5,13 @@ from datetime import datetime
 import pytz
 
 app = Flask(__name__)
+
+# Configurações Principais
 SENHA_ADM = "3484020200"
 DATABASE_URL = os.environ.get('DATABASE_URL')
 FUSO_BR = pytz.timezone('America/Sao_Paulo')
 
+# 1. Conexão com o Banco de Dados
 def get_db_connection():
     try:
         url = DATABASE_URL
@@ -23,6 +26,7 @@ def get_db_connection():
         print(f"Erro de conexão: {e}")
         return None
 
+# 2. Funções de Utilidade (Contador e Datas)
 def obter_total_acessos():
     try:
         conn = get_db_connection()
@@ -62,6 +66,7 @@ def obter_arquivo_datas():
         print(f"Erro ao obter datas: {e}")
         return []
 
+# 3. Rotas do Blog
 @app.route('/')
 def home():
     acessos = obter_total_acessos()
@@ -89,67 +94,4 @@ def ver_post(post_id):
         if conn:
             cur = conn.cursor()
             cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE id = %s", (post_id,))
-            post = cur.fetchone()
-            cur.close()
-            conn.close()
-    except:
-        pass
-    if post:
-        return render_template('post_unico.html', post=post, acessos=acessos, datas_arquivo=datas_arquivo)
-    return redirect(url_for('home'))
-
-@app.route('/admin')
-def admin():
-    acessos = obter_total_acessos()
-    datas_arquivo = obter_arquivo_datas()
-    posts = []
-    try:
-        conn = get_db_connection()
-        if conn:
-            cur = conn.cursor()
-            cur.execute("SELECT id, titulo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC;")
-            posts = cur.fetchall()
-            cur.close()
-            conn.close()
-    except:
-        pass
-    return render_template('admin.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
-
-@app.route('/deletar/<int:post_id>', methods=['POST'])
-def deletar_post(post_id):
-    senha = request.form.get('senha_adm')
-    if senha == SENHA_ADM:
-        try:
-            conn = get_db_connection()
-            if conn:
-                cur = conn.cursor()
-                cur.execute("DELETE FROM posts WHERE id = %s", (post_id,))
-                conn.commit()
-                cur.close()
-                conn.close()
-        except:
-            pass
-    return redirect(url_for('admin'))
-
-@app.route('/escrever', methods=['GET', 'POST'])
-def escrever():
-    if request.method == 'POST':
-        if request.form.get('senha_adm') == SENHA_ADM:
-            t, c = request.form['titulo'], request.form['conteudo']
-            agora_br = datetime.now(FUSO_BR)
-            try:
-                conn = get_db_connection()
-                if conn:
-                    cur = conn.cursor()
-                    cur.execute('INSERT INTO posts (titulo, conteudo, data_criacao) VALUES (%s, %s, %s);', (t, c, agora_br))
-                    conn.commit()
-                    cur.close()
-                    conn.close()
-                    return redirect(url_for('home'))
-            except Exception as e:
-                print(f"Erro ao salvar post: {e}")
-    return render_template('escrever.html')
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+            post = cur.fetchone
