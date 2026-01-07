@@ -78,7 +78,6 @@ def home():
         print(f"Erro home: {e}")
     return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
 
-# NOVA ROTA: Ver um post único
 @app.route('/post/<int:post_id>')
 def ver_post(post_id):
     acessos = obter_total_acessos()
@@ -96,4 +95,16 @@ def ver_post(post_id):
         print(f"Erro ver_post: {e}")
     
     if post:
-        return render_template('index.html', posts=[post], acess
+        # AQUI ESTAVA O ERRO - AGORA ESTÁ COMPLETO:
+        return render_template('index.html', posts=[post], acessos=acessos, datas_arquivo=datas_arquivo)
+    return redirect(url_for('home'))
+
+@app.route('/arquivo/<int:ano>/<int:mes>')
+def arquivo(ano, mes):
+    acessos = obter_total_acessos()
+    datas_arquivo = obter_arquivo_datas()
+    posts = []
+    try:
+        conn = get_db_connection()
+        if conn:
+            cur = conn.cursor()
