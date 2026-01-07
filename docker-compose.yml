@@ -14,20 +14,20 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-      - TZ=America/Sao_Paulo  # TOQUE MÁGICO AQUI
+      - TZ=America/Sao_Paulo
 
   pgdb:
-    image: postgres:18
+    image: postgres:16  # Mudamos para a 16 (estável)
     container_name: estudos_docker-pgdb-1
     environment:
       POSTGRES_USER: azuledoido
       POSTGRES_PASSWORD: "123"
       POSTGRES_DB: meubanco
-      TZ: America/Sao_Paulo   # E AQUI TAMBÉM
+      TZ: America/Sao_Paulo
     ports:
       - "5432:5432"
     volumes:
-      - /home/azul/postgres_data_v18:/var/lib/postgresql
+      - pgdata:/var/lib/postgresql/data # Usando volume nomeado (evita erro de permissão)
 
   redis:
     image: redis:alpine
@@ -36,3 +36,6 @@ services:
       - TZ=America/Sao_Paulo
     ports:
       - "6379:6379"
+
+volumes:
+  pgdata: # Define o volume nomeado
