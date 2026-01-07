@@ -6,6 +6,7 @@ import pytz
 
 app = Flask(__name__)
 
+# Configurações
 SENHA_ADM = "3484020200"
 DATABASE_URL = os.environ.get('DATABASE_URL')
 FUSO_BR = pytz.timezone('America/Sao_Paulo')
@@ -16,9 +17,6 @@ def get_db_connection():
         if url and "sslmode" not in url:
             url += "&sslmode=require" if "?" in url else "?sslmode=require"
         conn = psycopg2.connect(url)
-        cur = conn.cursor()
-        cur.execute("SET TIME ZONE 'America/Sao_Paulo';")
-        cur.close()
         return conn
     except Exception as e:
         print(f"Erro de conexão: {e}")
@@ -48,8 +46,8 @@ def obter_arquivo_datas():
         cur = conn.cursor()
         cur.execute("""
             SELECT 
-                EXTRACT(YEAR FROM COALESCE(data_criacao, NOW() AT TIME ZONE 'America/Sao_Paulo'))::int, 
-                EXTRACT(MONTH FROM COALESCE(data_criacao, NOW() AT TIME ZONE 'America/Sao_Paulo'))::int, 
+                EXTRACT(YEAR FROM data_criacao)::int, 
+                EXTRACT(MONTH FROM data_criacao)::int, 
                 COUNT(*)::int
             FROM posts 
             GROUP BY 1, 2 
@@ -71,34 +69,15 @@ def home():
         conn = get_db_connection()
         if conn:
             cur = conn.cursor()
-            cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC, id DESC;")
+            cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC;")
             posts = cur.fetchall()
             cur.close()
             conn.close()
     except Exception as e:
-        print(f"Erro na home: {e}")
+        print(f"Erro home: {e}")
     return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
 
-@app.route('/post/<int:post_id>')
-def ver_post(post_id):
-    acessos = obter_total_acessos()
-    datas_arquivo = obter_arquivo_datas()
-    post = None
-    try:
-        conn = get_db_connection()
-        if conn:
-            cur = conn.cursor()
-            cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE id = %s", (post_id,))
-            post = cur.fetchone()
-            cur.close()
-            conn.close()
-    except Exception as e:
-        print(f"Erro ao ver post: {e}")
-    
-    if post:
-        return render_template('post_unico.html', post=post, acessos=acessos, datas_arquivo=datas_arquivo)
-    return redirect(url_for('home'))
-
+# AQUI: Rota configurada para o arquivo admin.html
 @app.route('/admin')
 def admin():
     acessos = obter_total_acessos()
@@ -108,12 +87,15 @@ def admin():
         conn = get_db_connection()
         if conn:
             cur = conn.cursor()
+            # Seleciona exatamente o que o seu HTML pede: ID, Título e Data
             cur.execute("SELECT id, titulo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC;")
             posts = cur.fetchall()
             cur.close()
             conn.close()
     except Exception as e:
         print(f"Erro admin: {e}")
+    
+    # IMPORTANTE: O nome aqui deve ser admin.html
     return render_template('admin.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
 
 @app.route('/deletar/<int:post_id>', methods=['POST'])
@@ -128,28 +110,9 @@ def deletar_post(post_id):
                 conn.commit()
                 cur.close()
                 conn.close()
-        except Exception as e:
-            print(f"Erro deletar: {e}")
+        except:
+            pass
     return redirect(url_for('admin'))
-
-@app.route('/escrever', methods=['GET', 'POST'])
-def escrever():
-    if request.method == 'POST':
-        if request.form.get('senha_adm') == SENHA_ADM:
-            t, c = request.form['titulo'], request.form['conteudo']
-            agora_br = datetime.now(FUSO_BR)
-            try:
-                conn = get_db_connection()
-                if conn:
-                    cur = conn.cursor()
-                    cur.execute('INSERT INTO posts (titulo, conteudo, data_criacao) VALUES (%s, %s, %s);', (t, c, agora_br))
-                    conn.commit()
-                    cur.close()
-                    conn.close()
-                    return redirect(url_for('home'))
-            except Exception as e:
-                print(f"Erro escrever: {e}")
-    return render_template('escrever.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
