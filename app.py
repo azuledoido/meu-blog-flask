@@ -59,3 +59,11 @@ def obter_arquivo_datas():
         conn.close()
         return datas
     except Exception as e:
+        print(f"Erro ao obter datas: {e}")
+        return []
+
+@app.route('/')
+def home():
+    acessos = obter_total_acessos()
+    datas_arquivo = obter_arquivo_datas()
+    posts = []
