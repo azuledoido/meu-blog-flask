@@ -77,7 +77,6 @@ def home():
         print(f"Erro home: {e}")
     return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
 
-# AQUI: Rota configurada para o arquivo admin.html
 @app.route('/admin')
 def admin():
     acessos = obter_total_acessos()
@@ -86,34 +85,4 @@ def admin():
     try:
         conn = get_db_connection()
         if conn:
-            cur = conn.cursor()
-            # Seleciona exatamente o que o seu HTML pede: ID, Título e Data
-            cur.execute("SELECT id, titulo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC;")
-            posts = cur.fetchall()
-            cur.close()
-            conn.close()
-    except Exception as e:
-        print(f"Erro admin: {e}")
-    
-    # IMPORTANTE: O nome aqui deve ser admin.html
-    return render_template('admin.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
-
-@app.route('/deletar/<int:post_id>', methods=['POST'])
-def deletar_post(post_id):
-    senha = request.form.get('senha_adm')
-    if senha == SENHA_ADM:
-        try:
-            conn = get_db_connection()
-            if conn:
-                cur = conn.cursor()
-                cur.execute("DELETE FROM posts WHERE id = %s", (post_id,))
-                conn.commit()
-                cur.close()
-                conn.close()
-        except:
-            pass
-    return redirect(url_for('admin'))
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+            cur =
