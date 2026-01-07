@@ -5,6 +5,8 @@ from datetime import datetime
 import pytz
 
 app = Flask(__name__)
+# Permite que /admin e /admin/ funcionem do mesmo jeito
+app.url_map.strict_slashes = False
 
 # Configurações
 SENHA_ADM = "3484020200"
