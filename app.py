@@ -137,16 +137,3 @@ def escrever():
         if request.form.get('senha_adm') == SENHA_ADM:
             t, c = request.form['titulo'], request.form['conteudo']
             agora_br = datetime.now(FUSO_BR)
-            conn = get_db_connection()
-            if conn:
-                cur = conn.cursor()
-                cur.execute('INSERT INTO posts (titulo, conteudo, data_criacao) VALUES (%s, %s, %s);', (t, c, agora_br))
-                conn.commit()
-                cur.close()
-                conn.close()
-                return redirect(url_for('home'))
-    return render_template('escrever.html')
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
