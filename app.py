@@ -85,4 +85,50 @@ def admin():
     try:
         conn = get_db_connection()
         if conn:
-            cur =
+            cur = conn.cursor()
+            cur.execute("SELECT id, titulo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC;")
+            posts = cur.fetchall()
+            cur.close()
+            conn.close()
+    except Exception as e:
+        print(f"Erro admin: {e}")
+    return render_template('admin.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
+
+@app.route('/escrever', methods=['GET', 'POST'])
+def escrever():
+    if request.method == 'POST':
+        if request.form.get('senha_adm') == SENHA_ADM:
+            t, c = request.form['titulo'], request.form['conteudo']
+            agora_br = datetime.now(FUSO_BR)
+            try:
+                conn = get_db_connection()
+                if conn:
+                    cur = conn.cursor()
+                    cur.execute('INSERT INTO posts (titulo, conteudo, data_criacao) VALUES (%s, %s, %s);', (t, c, agora_br))
+                    conn.commit()
+                    cur.close()
+                    conn.close()
+                    return redirect(url_for('home'))
+            except Exception as e:
+                print(f"Erro escrever: {e}")
+    return render_template('escrever.html')
+
+@app.route('/deletar/<int:post_id>', methods=['POST'])
+def deletar_post(post_id):
+    senha = request.form.get('senha_adm')
+    if senha == SENHA_ADM:
+        try:
+            conn = get_db_connection()
+            if conn:
+                cur = conn.cursor()
+                cur.execute("DELETE FROM posts WHERE id = %s", (post_id,))
+                conn.commit()
+                cur.close()
+                conn.close()
+        except Exception as e:
+            print(f"Erro deletar: {e}")
+    return redirect(url_for('admin'))
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
