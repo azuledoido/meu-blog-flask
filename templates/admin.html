@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Admin - Azul e Doido</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .btn-excluir { background-color: #ff4d4d; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+        .btn-excluir:hover { background-color: #cc0000; }
+        .input-senha { padding: 5px; width: 120px; margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerenciar Posts</h1>
+        <p>Total de Acessos: {{ acessos }}</p>
+        <a href="{{ url_for('home') }}">⬅ Voltar para o Blog</a>
+        <hr>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Data</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for post in posts %}
+                <tr>
+                    <td>{{ post[0] }}</td>
+                    <td>{{ post[1] }}</td>
+                    <td>{{ post[2] }}</td>
+                    <td>
+                        <form action="{{ url_for('deletar_post', post_id=post[0]) }}" method="post" style="display:inline;">
+                            <input type="password" name="senha_adm" placeholder="Senha" class="input-senha" required>
+                            <button type="submit" class="btn-excluir" onclick="return confirm('Tem certeza que deseja deletar?')">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if not posts %}
+            <p>Nenhum post encontrado.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
