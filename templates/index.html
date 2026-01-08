@@ -8,25 +8,31 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @keyframes coresDoidas { 0% { background-color: #000d1a; } 50% { background-color: #00264d; } 100% { background-color: #000d1a; } }
-        body { animation: coresDoidas 10s infinite ease-in-out; color: #e6f2ff; min-height: 100vh; font-family: 'Inter', sans-serif; }
+        body { animation: coresDoidas 10s infinite ease-in-out; color: #e6f2ff; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
         .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; }
-        .nav-glass { background: rgba(0, 38, 77, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(0, 170, 255, 0.3); }
-        .post-card { transition: transform 0.3s; margin-bottom: 25px; padding: 25px; }
-        .post-card:hover { transform: translateY(-5px); border-color: #00aaff; }
-        .btn-modern { background: linear-gradient(45deg, #0056b3, #00aaff); color: white; border: none; border-radius: 8px; padding: 8px 20px; transition: 0.3s; text-decoration: none; display: inline-block; }
-        .btn-modern:hover { opacity: 0.9; color: white; box-shadow: 0 0 15px rgba(0, 170, 255, 0.4); }
-        .sidebar-title { border-left: 4px solid #00aaff; padding-left: 10px; margin-bottom: 15px; font-weight: bold; }
+        
+        /* Estilo dos Cards com Foto */
+        .post-card { overflow: hidden; transition: 0.3s; margin-bottom: 30px; }
+        .post-card:hover { transform: scale(1.02); border-color: #00aaff; }
+        .post-img { width: 100%; height: 200px; object-fit: cover; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        .nav-link i { margin-right: 5px; }
+        .sidebar-title { font-size: 1.1rem; border-bottom: 2px solid #00aaff; padding-bottom: 8px; margin-bottom: 20px; color: #00aaff; }
+        
+        .btn-abrir { background: #0056b3; color: white; border-radius: 20px; padding: 5px 20px; text-decoration: none; font-size: 0.9rem; }
+        .btn-abrir:hover { background: #00aaff; color: white; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark nav-glass sticky-top mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-opacity-50 sticky-top mb-4">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/"><i class="fas fa-terminal text-info"></i> AZUL_E_DOIDO</a>
+        <a class="navbar-brand fw-bold" href="/"><i class="fas fa-home"></i> AZUL E DOIDO</a>
         <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/">Home</a>
-            <a class="nav-link" href="/mural">Mural</a>
-            <a class="nav-link" href="/escrever"><i class="fas fa-lock-open"></i></a>
+            <a class="nav-link" href="/"><i class="fas fa-house-user"></i> Home</a>
+            <a class="nav-link" href="/mural"><i class="fas fa-comments"></i> Mural</a>
+            <a class="nav-link" href="/escrever"><i class="fas fa-user-shield"></i> Admin</a>
         </div>
     </div>
 </nav>
@@ -35,31 +41,34 @@
     <div class="row">
         <main class="col-md-8">
             {% for post in posts %}
-            <article class="glass post-card">
-                <h2 class="text-info">{{ post[1] }}</h2>
-                <p class="small opacity-50"><i class="far fa-calendar"></i> {{ post[3] }}</p>
-                <div class="mb-3">{{ post[2][:250] | safe }}...</div>
-                <a href="{{ url_for('exibir_post', post_id=post[0]) }}" class="btn-modern">Abrir Post <i class="fas fa-chevron-right"></i></a>
-            </article>
+            <div class="glass post-card">
+                <img src="https://source.unsplash.com/random/800x400/?tech,code&sig={{ post[0] }}" class="post-img" alt="Thumbnail">
+                <div class="p-4">
+                    <h2 class="h3 text-info">{{ post[1] }}</h2>
+                    <p class="small text-white-50"><i class="fas fa-calendar-day"></i> {{ post[3] }}</p>
+                    <div class="mb-3">{{ post[2][:200] | safe }}...</div>
+                    <a href="{{ url_for('exibir_post', post_id=post[0]) }}" class="btn-abrir">Continuar Lendo <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
             {% endfor %}
         </main>
 
         <aside class="col-md-4">
-            <div class="glass p-4 mb-4">
-                <h5 class="sidebar-title">VISUALIZAÇÕES</h5>
+            <div class="glass p-4 mb-4 text-center">
+                <h5 class="sidebar-title"><i class="fas fa-eye"></i> ACESSOS</h5>
                 <p class="display-5 fw-bold text-info">{{ acessos }}</p>
             </div>
             
             <div class="glass p-4">
-                <h5 class="sidebar-title">ARQUIVO</h5>
-                <div class="list-group list-group-flush bg-transparent">
+                <h5 class="sidebar-title"><i class="fas fa-box-archive"></i> ARQUIVO</h5>
+                <ul class="list-unstyled">
                     {% for data in datas_arquivo %}
-                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary">
-                        <span><i class="fas fa-folder text-info"></i> Mês {{ data[1] }} / {{ data[0] }}</span>
-                        <span class="badge bg-info text-dark rounded-pill">{{ data[2] }}</span>
-                    </div>
+                    <li class="py-2 border-bottom border-secondary d-flex justify-content-between">
+                        <span><i class="fas fa-folder-open text-info me-2"></i> Mês {{ data[1] }} / {{ data[0] }}</span>
+                        <span class="badge rounded-pill bg-primary">{{ data[2] }}</span>
+                    </li>
                     {% endfor %}
-                </div>
+                </ul>
             </div>
         </aside>
     </div>
