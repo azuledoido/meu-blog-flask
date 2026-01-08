@@ -97,19 +97,4 @@ def home():
     posts = []
     try:
         conn = get_db_connection()
-        if conn:
-            cur = conn.cursor()
-            cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC;")
-            posts = cur.fetchall()
-            cur.close()
-            conn.close()
-    except Exception as e:
-        print(f"Erro na Home: {e}")
-    return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
-
-@app.route('/mural', methods=['GET', 'POST'])
-def mural():
-    acessos = obter_total_acessos()
-    if request.method == 'POST':
-        nome = request.form.get('nome')
-        mensagem = request.
+        if
