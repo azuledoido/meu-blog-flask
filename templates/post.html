@@ -38,7 +38,6 @@
         }
         img { max-width: 100%; border-radius: 10px; margin: 20px 0; }
 
-        /* Estilização extra para o Disqus não destoar do layout */
         #disqus_thread {
             background: rgba(255, 255, 255, 0.03);
             padding: 20px;
@@ -77,8 +76,8 @@
                         };
                         (function() { 
                             var d = document, s = d.createElement('script');
-                            // IMPORTANTE: Substitua 'Azul e doido' pelo nome que você criar no Disqus
-                            s.src = 'https://SEU-NOME-CURTO-AQUI.disqus.com/embed.js';
+                            // Ajustado para o shortname padrão: azul-e-doido
+                            s.src = 'https://azul-e-doido.disqus.com/embed.js';
                             s.setAttribute('data-timestamp', +new Date());
                             (d.head || d.body).appendChild(s);
                         })();
