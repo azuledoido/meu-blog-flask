@@ -69,7 +69,8 @@ def obter_total_acessos():
         cur.close()
         conn.close()
         return total
-    except: return "1500+"
+    except:
+        return "1500+"
 
 def obter_arquivo_datas():
     try:
@@ -84,3 +85,31 @@ def obter_arquivo_datas():
         cur.close()
         conn.close()
         return datas
+    except:
+        return []
+
+# --- ROTAS DO SITE ---
+
+@app.route('/')
+def home():
+    acessos = obter_total_acessos()
+    datas_arquivo = obter_arquivo_datas()
+    posts = []
+    try:
+        conn = get_db_connection()
+        if conn:
+            cur = conn.cursor()
+            cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC;")
+            posts = cur.fetchall()
+            cur.close()
+            conn.close()
+    except Exception as e:
+        print(f"Erro na Home: {e}")
+    return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
+
+@app.route('/mural', methods=['GET', 'POST'])
+def mural():
+    acessos = obter_total_acessos()
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        mensagem = request.
