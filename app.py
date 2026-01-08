@@ -20,7 +20,6 @@ def get_db_connection():
         url = DATABASE_URL
         if not url:
             return None
-        # Garante o SSL para o Render
         if "sslmode" not in url:
             url += "&sslmode=require" if "?" in url else "?sslmode=require"
         conn = psycopg2.connect(url)
@@ -32,9 +31,9 @@ def get_db_connection():
 # --- FUNÇÕES DE APOIO ---
 
 def configurar_banco():
+    conn = get_db_connection()
+    if not conn: return
     try:
-        conn = get_db_connection()
-        if not conn: return
         cur = conn.cursor()
         cur.execute("""
             CREATE TABLE IF NOT EXISTS posts (
@@ -85,11 +84,3 @@ def obter_arquivo_datas():
         cur.close()
         conn.close()
         return datas
-    except: return []
-
-# --- ROTAS DO SITE ---
-
-@app.route('/')
-def home():
-    acessos = obter_total_acessos()
-    datas
