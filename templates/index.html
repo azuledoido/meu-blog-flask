@@ -18,50 +18,48 @@
             color: #e6f2ff; 
             min-height: 100vh; 
             font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            padding: 0;
         }
 
-        /* Glassmorphism Sólido (sem blur para não bugar a rolagem) */
+        /* Glassmorphism sem borrão para não travar a rolagem */
         .glass { 
             background: rgba(0, 15, 30, 0.9); 
             border: 1px solid rgba(0, 170, 255, 0.3); 
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
         .post-card { overflow: hidden; transition: 0.3s; margin-bottom: 25px; border: 1px solid rgba(0, 170, 255, 0.2); }
         .post-card:hover { transform: translateY(-3px); border-color: #00aaff; }
 
         /* Ajuste das Fotos */
-        .post-img-container {
-            width: 100%;
-            height: 220px;
-            background: #000;
-            display: block;
-        }
         .post-img { 
             width: 100%; 
-            height: 100%; 
+            height: 220px; 
             object-fit: cover; 
-            opacity: 0.9;
+            background: #000;
         }
 
-        .sidebar-title { border-bottom: 2px solid #00aaff; padding-bottom: 8px; margin-bottom: 15px; color: #00aaff; font-size: 1rem; }
+        .sidebar-title { border-bottom: 2px solid #00aaff; padding-bottom: 8px; margin-bottom: 15px; color: #00aaff; font-weight: bold; }
         
         .btn-abrir { 
             background: #0056b3; 
             color: white; 
             border-radius: 20px; 
-            padding: 7px 20px; 
+            padding: 8px 25px; 
             text-decoration: none; 
-            font-size: 0.85rem;
-            display: inline-block;
             transition: 0.3s;
+            display: inline-block;
         }
-        .btn-abrir:hover { background: #00aaff; color: white; box-shadow: 0 0 10px #00aaff; }
+        .btn-abrir:hover { background: #00aaff; box-shadow: 0 0 10px #00aaff; }
 
-        .arquivo-link { text-decoration: none; color: inherit; display: flex; justify-content: space-between; padding: 8px; border-radius: 5px; transition: 0.2s; }
+        .arquivo-link { 
+            text-decoration: none; 
+            color: inherit; 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 10px; 
+            border-radius: 8px; 
+            transition: 0.2s;
+        }
         .arquivo-link:hover { background: rgba(0, 170, 255, 0.2); color: #00aaff; }
     </style>
 </head>
@@ -79,4 +77,53 @@
 </nav>
 
 <div class="container">
-    <div class="row
+    <div class="row">
+        <main class="col-md-8">
+            {% if posts %}
+                {% for post in posts %}
+                <div class="glass post-card">
+                    {% if post[4] %}
+                        <img src="{{ post[4] }}" class="post-img" alt="Capa">
+                    {% else %}
+                        <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=800" class="post-img" alt="Capa Padrão">
+                    {% endif %}
+
+                    <div class="p-4">
+                        <h2 class="h4 text-info">{{ post[1] }}</h2>
+                        <p class="small text-white-50"><i class="far fa-calendar-alt"></i> {{ post[3] }}</p>
+                        <div class="mb-3" style="color: #ccc;">
+                            {{ post[2][:180] | striptags }}...
+                        </div>
+                        <a href="{{ url_for('exibir_post', post_id=post[0]) }}" class="btn-abrir">Continuar Lendo</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="glass p-5 text-center">
+                    <h3>Nenhum post no radar...</h3>
+                    <p>Crie algo novo no painel de Admin!</p>
+                </div>
+            {% endif %}
+        </main>
+
+        <aside class="col-md-4">
+            <div class="glass p-4 mb-4 text-center">
+                <h5 class="sidebar-title">ACESSOS</h5>
+                <p class="display-6 fw-bold text-info">{{ acessos }}</p>
+            </div>
+            
+            <div class="glass p-4">
+                <h5 class="sidebar-title">ARQUIVO</h5>
+                {% for data in datas_arquivo %}
+                <a href="{{ url_for('arquivo_data', ano=data[0], mes=data[1]) }}" class="arquivo-link mb-1">
+                    <span><i class="far fa-folder-open text-info me-2"></i> Mês {{ data[1] }}/{{ data[0] }}</span>
+                    <span class="badge bg-primary rounded-pill">{{ data[2] }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </aside>
+    </div>
+</div>
+
+</body>
+</html>
