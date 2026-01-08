@@ -2,41 +2,101 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Mural - Azul e Doido</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mural - azul e doido</title>
     <style>
-        body { background-color: #001a33; color: #e6f2ff; font-family: sans-serif; margin: 0; }
-        nav { display: flex; justify-content: center; gap: 20px; padding: 20px; background: #003366; border-bottom: 3px solid #00509e; }
-        nav a { color: #ffffff; text-decoration: none; font-weight: bold; }
-        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
-        .form-mural { background: #00264d; padding: 20px; border-radius: 10px; border: 1px solid #007bff; margin-bottom: 30px; }
-        input, textarea { width: 100%; padding: 10px; margin: 10px 0; background: #001a33; border: 1px solid #00509e; color: white; border-radius: 5px; }
-        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
-        .recado { background: #00264d; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid #38bdf8; }
+        /* CSS Integrado para visual moderno */
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .voltar { color: #3d5afe; text-decoration: none; font-weight: bold; }
+        
+        h1 { color: #ffffff; border-bottom: 3px solid #3d5afe; padding-bottom: 10px; }
+
+        .form-mural {
+            background: #1e1e1e;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 20px 0;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #2c2c2c;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 8px;
+            box-sizing: border-box; /* Garante que não passe da largura */
+        }
+
+        button {
+            background: #3d5afe;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            transition: 0.3s ease;
+        }
+
+        button:hover { background: #536dfe; transform: scale(1.02); }
+
+        .card-mensagem {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 5px solid #ff4081;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .user-info { font-size: 0.85em; color: #888; margin-bottom: 5px; }
+        .user-info strong { color: #3d5afe; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
-    <nav>
-        <a href="/">🏠 BLOG</a>
-        <a href="/mural">💬 MURAL</a>
-    </nav>
 
-    <div class="container">
-        <h1 style="color: #38bdf8;">💬 Mural de Recados</h1>
-        
-        <div class="form-mural">
-            <form action="/mural" method="POST">
-                <input type="text" name="nome" placeholder="Seu nome" required>
-                <textarea name="mensagem" placeholder="Deixe um recado..." rows="3" required></textarea>
-                <button type="submit">Enviar</button>
-            </form>
-        </div>
+    <a href="/" class="voltar">← Voltar ao Blog</a>
+    
+    <h1>Mural de Recados</h1>
+    <p>Acessos registrados: <strong>{{ acessos }}</strong></p>
 
-        {% for r in recados %}
-        <div class="recado">
-            <strong style="color: #38bdf8;">{{ r[1] }}</strong>
-            <p>{{ r[2] }}</p>
-        </div>
+    <div class="form-mural">
+        <form method="POST">
+            <input type="text" name="nome" placeholder="Seu nome ou apelido" required>
+            <textarea name="mensagem" rows="4" placeholder="Deixe sua mensagem para o azul e doido..." required></textarea>
+            <button type="submit">Enviar Mensagem</button>
+        </form>
+    </div>
+
+    <div id="mensagens-lista">
+        {% for m in mensagens %}
+            <div class="card-mensagem">
+                <div class="user-info">
+                    <strong>{{ m[0] }}</strong> enviou em {{ m[2] }}
+                </div>
+                <p style="margin: 0;">{{ m[1] }}</p>
+            </div>
         {% endfor %}
     </div>
+
 </body>
 </html>
