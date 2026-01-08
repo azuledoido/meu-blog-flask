@@ -1,4 +1,4 @@
-import os, psycopg2, pytz
+import os, psycopg2, pytz, re  # Adicionado 're' aqui
 from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime
 from dotenv import load_dotenv
@@ -19,6 +19,12 @@ def get_db_connection():
             url += "&sslmode=require" if "?" in url else "?sslmode=require"
         return psycopg2.connect(url)
     except: return None
+
+# Função auxiliar para pegar a primeira imagem do HTML do post
+def extrair_primeira_img(conteudo):
+    if not conteudo: return None
+    match = re.search(r'<img [^>]*src="([^"]+)"', conteudo)
+    return match.group(1) if match else None
 
 def obter_total_acessos():
     try:
@@ -47,8 +53,15 @@ def home():
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC;")
-        p = cur.fetchall(); cur.close(); conn.close()
-        return render_template('index.html', posts=p, acessos=acessos, datas_arquivo=datas)
+        p_brutos = cur.fetchall(); cur.close(); conn.close()
+        
+        # Injetando a URL da imagem em cada post
+        posts_com_img = []
+        for p in p_brutos:
+            img = extrair_primeira_img(p[2])
+            posts_com_img.append(list(p) + [img]) # p[4] agora é a imagem
+            
+        return render_template('index.html', posts=posts_com_img, acessos=acessos, datas_arquivo=datas)
     except: return render_template('index.html', posts=[], acessos=acessos, datas_arquivo=datas)
 
 @app.route('/arquivo/<int:ano>/<int:mes>')
@@ -58,10 +71,15 @@ def arquivo_data(ano, mes):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        # Removi as aspas triplas problemáticas e usei aspas simples para evitar erro
         cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE EXTRACT(YEAR FROM data_criacao) = %s AND EXTRACT(MONTH FROM data_criacao) = %s ORDER BY data_criacao DESC;", (ano, mes))
-        p = cur.fetchall(); cur.close(); conn.close()
-        return render_template('index.html', posts=p, acessos=acessos, datas_arquivo=datas_arquivo)
+        p_brutos = cur.fetchall(); cur.close(); conn.close()
+        
+        posts_com_img = []
+        for p in p_brutos:
+            img = extrair_primeira_img(p[2])
+            posts_com_img.append(list(p) + [img])
+            
+        return render_template('index.html', posts=posts_com_img, acessos=acessos, datas_arquivo=datas_arquivo)
     except: return redirect(url_for('home'))
 
 @app.route('/post/<int:post_id>')
@@ -95,15 +113,4 @@ def mural():
 
 @app.route('/escrever', methods=['GET', 'POST'])
 def escrever():
-    if request.method == 'POST' and request.form.get('senha_adm') == SENHA_ADM:
-        t, c = request.form.get('titulo'), request.form.get('conteudo')
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute('INSERT INTO posts (titulo, conteudo, data_criacao) VALUES (%s, %s, %s);', (t, c, datetime.now(FUSO_BR)))
-        conn.commit(); cur.close(); conn.close()
-        return redirect(url_for('home'))
-    return render_template('escrever.html')
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+    if request.method == 'POST' and request.form.get('senha_adm') == SEN
