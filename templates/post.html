@@ -3,9 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>{{ post[1] }} - Azul e Doido</title>
+
+    <meta name="description" content="Confira este post no blog Azul e Doido: {{ post[1] }}">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ post[1] }} - Azul e Doido">
+    <meta property="og:description" content="Leia mais sobre {{ post[1] }} no blog mais azul e doido da internet.">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:site_name" content="Azul e Doido">
+    
+    <meta property="og:image" content="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ post[1] }}">
+    <meta name="twitter:description" content="Novo post no blog Azul e Doido!">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         @keyframes coresDoidas { 
             0% { background-color: #000d1a; } 
@@ -70,22 +85,3 @@
                     </div>
 
                     <div id="disqus_thread"></div>
-                    <script>
-                        var disqus_config = function () {
-                            this.page.url = "{{ request.url }}";  
-                            this.page.identifier = "{{ post[0] }}"; 
-                        };
-                        (function() { 
-                            var d = document, s = d.createElement('script');
-                            s.src = 'https://azuledoido.disqus.com/embed.js';
-                            s.setAttribute('data-timestamp', +new Date());
-                            (d.head || d.body).appendChild(s);
-                        })();
-                    </script>
-                    <noscript>Habilite o JavaScript para ver os comentários.</noscript>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
