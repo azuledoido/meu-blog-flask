@@ -1,32 +1,82 @@
-<main class="col-md-8">
-    {% if posts %}
-        {% for post in posts %}
-        <article class="glass post-card mb-4" style="display: flex; flex-direction: column;">
-            
-            {% if post[4] %}
-            <div style="width: 100%; max-height: 350px; overflow: hidden; border-radius: 12px 12px 0 0;">
-                <img src="{{ post[4] }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Capa do post">
-            </div>
-            {% endif %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azul e Doido - Blog Oficial</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @keyframes coresDoidas { 0% { background-color: #000d1a; } 50% { background-color: #001a33; } 100% { background-color: #000d1a; } }
+        body { animation: coresDoidas 12s infinite ease-in-out; color: #e6f2ff; min-height: 100vh; font-family: sans-serif; }
+        
+        .glass { background: rgba(0, 20, 40, 0.85); border: 1px solid rgba(0, 170, 255, 0.3); border-radius: 15px; margin-bottom: 25px; }
+        .post-card { overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* Container da imagem para não quebrar o layout */
+        .capa-container { width: 100%; max-height: 300px; overflow: hidden; border-bottom: 1px solid rgba(0, 170, 255, 0.2); }
+        .capa-img { width: 100%; height: auto; display: block; object-fit: cover; }
+        
+        .btn-abrir { background: #0056b3; color: white; border-radius: 20px; padding: 8px 20px; text-decoration: none; display: inline-block; transition: 0.3s; }
+        .btn-abrir:hover { background: #00aaff; color: white; box-shadow: 0 0 10px #00aaff; }
+        
+        .sidebar-title { border-bottom: 2px solid #00aaff; padding-bottom: 8px; margin-bottom: 15px; color: #00aaff; font-weight: bold; }
+        .arquivo-link { text-decoration: none; color: inherit; display: flex; justify-content: space-between; padding: 10px; border-radius: 8px; }
+        .arquivo-link:hover { background: rgba(0, 170, 255, 0.2); }
+    </style>
+</head>
+<body>
 
-            <div class="p-4">
-                <h2 class="h3 text-info" style="margin-top: 0;">{{ post[1] }}</h2>
-                <p class="small text-white-50"><i class="far fa-calendar-alt"></i> {{ post[3] }}</p>
-                
-                <div class="mb-3" style="color: #eee; line-height: 1.6;">
-                    {# Removemos tags HTML do resumo para não quebrar o layout #}
-                    {{ post[2] | striptags | truncate(250) }}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-opacity-75 sticky-top mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/"><i class="fas fa-home"></i> AZUL E DOIDO</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <main class="col-md-8">
+            {% for post in posts %}
+            <div class="glass post-card">
+                {% if post[4] %}
+                <div class="capa-container">
+                    <img src="{{ post[4] }}" class="capa-img" alt="Capa">
                 </div>
-                
-                <a href="{{ url_for('exibir_post', post_id=post[0]) }}" class="btn-abrir">
-                    Continuar Lendo <i class="fas fa-arrow-right ms-1"></i>
-                </a>
+                {% endif %}
+
+                <div class="p-4">
+                    <h2 class="h3 text-info">{{ post[1] }}</h2>
+                    <p class="small text-white-50"><i class="far fa-calendar-alt"></i> {{ post[3] }}</p>
+                    
+                    <div class="mb-4" style="color: #ccc;">
+                        {# Resumo simples: pega os primeiros 200 caracteres e remove tags HTML manualmente #}
+                        {{ post[2]|striptags|truncate(200) }}
+                    </div>
+                    
+                    <a href="{{ url_for('exibir_post', post_id=post[0]) }}" class="btn-abrir">Continuar Lendo</a>
+                </div>
             </div>
-        </article>
-        {% endfor %}
-    {% else %}
-        <div class="glass p-5 text-center">
-            <h3>Nenhum post encontrado.</h3>
-        </div>
-    {% endif %}
-</main>
+            {% endfor %}
+        </main>
+
+        <aside class="col-md-4">
+            <div class="glass p-4 mb-4 text-center">
+                <h5 class="sidebar-title">ACESSOS</h5>
+                <p class="h2 text-info">{{ acessos }}</p>
+            </div>
+            
+            <div class="glass p-4">
+                <h5 class="sidebar-title">ARQUIVO</h5>
+                {% for data in datas_arquivo %}
+                <a href="{{ url_for('arquivo_data', ano=data[0], mes=data[1]) }}" class="arquivo-link">
+                    <span>Mês {{ data[1] }}/{{ data[0] }}</span>
+                    <span class="badge bg-primary rounded-pill">{{ data[2] }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </aside>
+    </div>
+</div>
+
+</body>
+</html>
