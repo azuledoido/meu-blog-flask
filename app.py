@@ -34,12 +34,7 @@ def obter_arquivo_datas():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("""
-            SELECT EXTRACT(YEAR FROM data_criacao)::int as ano, 
-                   EXTRACT(MONTH FROM data_criacao)::int as mes, 
-                   COUNT(*)::int 
-            FROM posts GROUP BY 1, 2 ORDER BY 1 DESC, 2 DESC;
-        """)
+        cur.execute("SELECT EXTRACT(YEAR FROM data_criacao)::int, EXTRACT(MONTH FROM data_criacao)::int, COUNT(*)::int FROM posts GROUP BY 1, 2 ORDER BY 1 DESC, 2 DESC;")
         d = cur.fetchall(); cur.close(); conn.close()
         return d
     except: return []
@@ -56,7 +51,6 @@ def home():
         return render_template('index.html', posts=p, acessos=acessos, datas_arquivo=datas)
     except: return render_template('index.html', posts=[], acessos=acessos, datas_arquivo=datas)
 
-# --- NOVA ROTA INTEGRADA PARA DESCONGELAR O ARQUIVO ---
 @app.route('/arquivo/<int:ano>/<int:mes>')
 def arquivo_data(ano, mes):
     acessos = obter_total_acessos()
@@ -64,5 +58,52 @@ def arquivo_data(ano, mes):
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("""
-            SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY
+        # Removi as aspas triplas problemáticas e usei aspas simples para evitar erro
+        cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE EXTRACT(YEAR FROM data_criacao) = %s AND EXTRACT(MONTH FROM data_criacao) = %s ORDER BY data_criacao DESC;", (ano, mes))
+        p = cur.fetchall(); cur.close(); conn.close()
+        return render_template('index.html', posts=p, acessos=acessos, datas_arquivo=datas_arquivo)
+    except: return redirect(url_for('home'))
+
+@app.route('/post/<int:post_id>')
+def exibir_post(post_id):
+    acessos = obter_total_acessos()
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY HH24:MI') FROM posts WHERE id = %s", (post_id,))
+        p = cur.fetchone(); cur.close(); conn.close()
+        if p: return render_template('post.html', post=p, acessos=acessos)
+        return redirect(url_for('home'))
+    except: return redirect(url_for('home'))
+
+@app.route('/mural', methods=['GET', 'POST'])
+def mural():
+    if request.method == 'POST':
+        n, m = request.form.get('nome'), request.form.get('mensagem')
+        if n and m:
+            conn = get_db_connection()
+            cur = conn.cursor(); cur.execute("INSERT INTO mural (nome, mensagem) VALUES (%s, %s)", (n, m))
+            conn.commit(); cur.close(); conn.close()
+            return redirect(url_for('mural'))
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT nome, mensagem, TO_CHAR(data_postagem, 'DD/MM HH24:MI') FROM mural ORDER BY data_postagem DESC LIMIT 30;")
+        msg = cur.fetchall(); cur.close(); conn.close()
+        return render_template('mural.html', mensagens=msg, acessos=obter_total_acessos())
+    except: return render_template('mural.html', mensagens=[], acessos="1500+")
+
+@app.route('/escrever', methods=['GET', 'POST'])
+def escrever():
+    if request.method == 'POST' and request.form.get('senha_adm') == SENHA_ADM:
+        t, c = request.form.get('titulo'), request.form.get('conteudo')
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('INSERT INTO posts (titulo, conteudo, data_criacao) VALUES (%s, %s, %s);', (t, c, datetime.now(FUSO_BR)))
+        conn.commit(); cur.close(); conn.close()
+        return redirect(url_for('home'))
+    return render_template('escrever.html')
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
