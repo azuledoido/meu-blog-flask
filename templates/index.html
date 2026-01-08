@@ -7,59 +7,61 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @keyframes bg-animation { 0% { background-color: #001a33; } 50% { background-color: #003366; } 100% { background-color: #001a33; } }
-        body { animation: bg-animation 10s infinite; color: #f0faff; min-height: 100vh; }
-        .navbar { background-color: #00264d !important; border-bottom: 2px solid #0056b3; }
-        .card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 170, 255, 0.2); color: white; margin-bottom: 20px; }
-        .btn-azul { background: #0056b3; color: white; }
-        .btn-azul:hover { background: #007bff; }
-        .sidebar-widget { background: rgba(0, 0, 0, 0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        @keyframes coresDoidas { 0% { background-color: #000d1a; } 50% { background-color: #00264d; } 100% { background-color: #000d1a; } }
+        body { animation: coresDoidas 10s infinite ease-in-out; color: #e6f2ff; min-height: 100vh; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; }
+        .nav-glass { background: rgba(0, 38, 77, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(0, 170, 255, 0.3); }
+        .post-card { transition: transform 0.3s; margin-bottom: 25px; padding: 25px; }
+        .post-card:hover { transform: translateY(-5px); border-color: #00aaff; }
+        .btn-modern { background: linear-gradient(45deg, #0056b3, #00aaff); color: white; border: none; border-radius: 8px; padding: 8px 20px; transition: 0.3s; text-decoration: none; display: inline-block; }
+        .btn-modern:hover { opacity: 0.9; color: white; box-shadow: 0 0 15px rgba(0, 170, 255, 0.4); }
+        .sidebar-title { border-left: 4px solid #00aaff; padding-left: 10px; margin-bottom: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark nav-glass sticky-top mb-4">
     <div class="container">
-        <a class="navbar-brand" href="/"><i class="fas fa-ghost"></i> Azul e Doido</a>
+        <a class="navbar-brand fw-bold" href="/"><i class="fas fa-terminal text-info"></i> AZUL_E_DOIDO</a>
         <div class="navbar-nav ms-auto">
             <a class="nav-link" href="/">Home</a>
             <a class="nav-link" href="/mural">Mural</a>
-            <a class="nav-link" href="/escrever">Admin</a>
+            <a class="nav-link" href="/escrever"><i class="fas fa-lock-open"></i></a>
         </div>
     </div>
 </nav>
 
 <div class="container">
     <div class="row">
-        <div class="col-md-8">
+        <main class="col-md-8">
             {% for post in posts %}
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h2 class="card-title text-info">{{ post[1] }}</h2>
-                    <p class="text-muted small"><i class="fas fa-calendar-alt"></i> {{ post[3] }}</p>
-                    <div class="card-text">
-                        {{ post[2][:300] | safe }}...
+            <article class="glass post-card">
+                <h2 class="text-info">{{ post[1] }}</h2>
+                <p class="small opacity-50"><i class="far fa-calendar"></i> {{ post[3] }}</p>
+                <div class="mb-3">{{ post[2][:250] | safe }}...</div>
+                <a href="{{ url_for('exibir_post', post_id=post[0]) }}" class="btn-modern">Abrir Post <i class="fas fa-chevron-right"></i></a>
+            </article>
+            {% endfor %}
+        </main>
+
+        <aside class="col-md-4">
+            <div class="glass p-4 mb-4">
+                <h5 class="sidebar-title">VISUALIZAÇÕES</h5>
+                <p class="display-5 fw-bold text-info">{{ acessos }}</p>
+            </div>
+            
+            <div class="glass p-4">
+                <h5 class="sidebar-title">ARQUIVO</h5>
+                <div class="list-group list-group-flush bg-transparent">
+                    {% for data in datas_arquivo %}
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary">
+                        <span><i class="fas fa-folder text-info"></i> Mês {{ data[1] }} / {{ data[0] }}</span>
+                        <span class="badge bg-info text-dark rounded-pill">{{ data[2] }}</span>
                     </div>
-                    <a href="/post/{{ post[0] }}" class="btn btn-azul btn-sm mt-3">Continuar Lendo</a>
+                    {% endfor %}
                 </div>
             </div>
-            {% endfor %}
-        </div>
-
-        <div class="col-md-4">
-            <div class="sidebar-widget">
-                <h5><i class="fas fa-chart-line"></i> Acessos</h5>
-                <p class="display-6 text-info">{{ acessos }}</p>
-            </div>
-            <div class="sidebar-widget">
-                <h5><i class="fas fa-archive"></i> Arquivo</h5>
-                <ul class="list-unstyled">
-                    {% for data in datas_arquivo %}
-                    <li><i class="fas fa-folder-open text-primary"></i> {{ data[1] }}/{{ data[0] }} ({{ data[2] }})</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+        </aside>
     </div>
 </div>
 

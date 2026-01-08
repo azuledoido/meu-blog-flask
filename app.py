@@ -20,7 +20,6 @@ def get_db_connection():
         return psycopg2.connect(url)
     except: return None
 
-# Funções de suporte originais
 def obter_total_acessos():
     try:
         conn = get_db_connection()
@@ -35,7 +34,12 @@ def obter_arquivo_datas():
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT EXTRACT(YEAR FROM data_criacao)::int, EXTRACT(MONTH FROM data_criacao)::int, COUNT(*)::int FROM posts GROUP BY 1, 2 ORDER BY 1 DESC, 2 DESC;")
+        cur.execute("""
+            SELECT EXTRACT(YEAR FROM data_criacao)::int as ano, 
+                   EXTRACT(MONTH FROM data_criacao)::int as mes, 
+                   COUNT(*)::int 
+            FROM posts GROUP BY 1, 2 ORDER BY 1 DESC, 2 DESC;
+        """)
         d = cur.fetchall(); cur.close(); conn.close()
         return d
     except: return []
@@ -54,12 +58,14 @@ def home():
 
 @app.route('/post/<int:post_id>')
 def exibir_post(post_id):
+    acessos = obter_total_acessos()
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY HH24:MI') FROM posts WHERE id = %s", (post_id,))
         p = cur.fetchone(); cur.close(); conn.close()
-        return render_template('post.html', post=p, acessos=obter_total_acessos())
+        if p: return render_template('post.html', post=p, acessos=acessos)
+        return redirect(url_for('home'))
     except: return redirect(url_for('home'))
 
 @app.route('/mural', methods=['GET', 'POST'])
