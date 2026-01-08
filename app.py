@@ -1,5 +1,5 @@
 import os, psycopg2, pytz, re
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, abort
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -60,22 +60,6 @@ def home():
         return render_template('index.html', posts=posts_com_img, acessos=acessos, datas_arquivo=datas)
     except: return render_template('index.html', posts=[], acessos=acessos, datas_arquivo=datas)
 
-@app.route('/arquivo/<int:ano>/<int:mes>')
-def arquivo_data(ano, mes):
-    acessos = obter_total_acessos()
-    datas_arquivo = obter_arquivo_datas()
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE EXTRACT(YEAR FROM data_criacao) = %s AND EXTRACT(MONTH FROM data_criacao) = %s ORDER BY data_criacao DESC;", (ano, mes))
-        p_brutos = cur.fetchall(); cur.close(); conn.close()
-        posts_com_img = []
-        for p in p_brutos:
-            img = extrair_primeira_img(p[2])
-            posts_com_img.append(list(p) + [img])
-        return render_template('index.html', posts=posts_com_img, acessos=acessos, datas_arquivo=datas_arquivo)
-    except: return redirect(url_for('home'))
-
 @app.route('/post/<int:post_id>')
 def exibir_post(post_id):
     acessos = obter_total_acessos()
@@ -88,6 +72,41 @@ def exibir_post(post_id):
         return redirect(url_for('home'))
     except: return redirect(url_for('home'))
 
+@app.route('/escrever', methods=['GET', 'POST'])
+def escrever():
+    if request.method == 'POST' and request.form.get('senha_adm') == SENHA_ADM:
+        t, c = request.form.get('titulo'), request.form.get('conteudo')
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute('INSERT INTO posts (titulo, conteudo, data_criacao) VALUES (%s, %s, %s);', (t, c, datetime.now(FUSO_BR)))
+        conn.commit(); cur.close(); conn.close()
+        return redirect(url_for('home'))
+    return render_template('escrever.html')
+
+# --- NOVA ROTA: GERENCIADOR DE POSTS ---
+@app.route('/admin_posts', methods=['GET', 'POST'])
+def admin_posts():
+    posts = []
+    if request.method == 'POST':
+        if request.form.get('senha') == SENHA_ADM:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT id, titulo, TO_CHAR(data_criacao, 'DD/MM/YY HH24:MI') FROM posts ORDER BY data_criacao DESC")
+            posts = cur.fetchall()
+            cur.close(); conn.close()
+            return render_template('admin_posts.html', posts=posts, senha=SENHA_ADM)
+    return render_template('admin_posts.html', posts=posts)
+
+@app.route('/deletar/<int:post_id>', methods=['POST'])
+def deletar_post(post_id):
+    if request.form.get('senha') == SENHA_ADM:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM posts WHERE id = %s", (post_id,))
+        conn.commit(); cur.close(); conn.close()
+    return redirect(url_for('admin_posts'))
+
+# As outras rotas (mural, arquivo_data) permanecem iguais...
 @app.route('/mural', methods=['GET', 'POST'])
 def mural():
     if request.method == 'POST':
@@ -105,16 +124,21 @@ def mural():
         return render_template('mural.html', mensagens=msg, acessos=obter_total_acessos())
     except: return render_template('mural.html', mensagens=[], acessos="1500+")
 
-@app.route('/escrever', methods=['GET', 'POST'])
-def escrever():
-    if request.method == 'POST' and request.form.get('senha_adm') == SENHA_ADM:
-        t, c = request.form.get('titulo'), request.form.get('conteudo')
+@app.route('/arquivo/<int:ano>/<int:mes>')
+def arquivo_data(ano, mes):
+    acessos = obter_total_acessos()
+    datas_arquivo = obter_arquivo_datas()
+    try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute('INSERT INTO posts (titulo, conteudo, data_criacao) VALUES (%s, %s, %s);', (t, c, datetime.now(FUSO_BR)))
-        conn.commit(); cur.close(); conn.close()
-        return redirect(url_for('home'))
-    return render_template('escrever.html')
+        cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE EXTRACT(YEAR FROM data_criacao) = %s AND EXTRACT(MONTH FROM data_criacao) = %s ORDER BY data_criacao DESC;", (ano, mes))
+        p_brutos = cur.fetchall(); cur.close(); conn.close()
+        posts_com_img = []
+        for p in p_brutos:
+            img = extrair_primeira_img(p[2])
+            posts_com_img.append(list(p) + [img])
+        return render_template('index.html', posts=posts_com_img, acessos=acessos, datas_arquivo=datas_arquivo)
+    except: return redirect(url_for('home'))
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
