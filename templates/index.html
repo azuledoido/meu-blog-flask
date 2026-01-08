@@ -2,7 +2,6 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="google-site-verification" content="wfKoyi0nGs_57l5RONIcQ89boVXjxNolm2u9s9sWwxI" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Azul e Doido - Pensamentos, Tecnologia e Docker</title>
     <style>
@@ -14,24 +13,25 @@
         }
         body { 
             animation: coresDoidas 8s ease-in-out infinite;
-            color: #e6f2ff; 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
-            margin: 0; 
-            padding: 0;
+            color: #e6f2ff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0;
         }
         nav { 
             display: flex; justify-content: center; gap: 20px; 
             padding: 20px; background: #003366; border-bottom: 3px solid #00509e;
             position: sticky; top: 0; z-index: 100;
         }
-        nav a { color: #ffffff; text-decoration: none; font-weight: bold; padding: 5px 10px; border-radius: 5px; }
-        nav a:hover { background: #00509e; }
+        nav a { color: #ffffff; text-decoration: none; font-weight: bold; }
         
-        main { max-width: 800px; margin: 20px auto; padding: 0 20px; }
+        .container { display: flex; max-width: 1200px; margin: 20px auto; gap: 20px; padding: 0 20px; }
+        main { flex: 3; }
+        aside { flex: 1; background: rgba(0, 0, 0, 0.2); padding: 20px; border-radius: 10px; height: fit-content; }
+        
         .post { background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #00aaff; }
-        .post h2 { margin-top: 0; color: #00aaff; }
+        .post h2 { color: #00aaff; margin-top: 0; }
         .data { font-size: 0.8em; color: #80bfff; }
-        .contador { text-align: center; padding: 10px; font-size: 0.9em; opacity: 0.8; }
+        .widget h3 { border-bottom: 1px solid #00aaff; padding-bottom: 5px; }
+        .widget ul { list-style: none; padding: 0; }
+        .widget li { padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
@@ -42,30 +42,38 @@
     <a href="/escrever">Escrever</a>
 </nav>
 
-<main>
-    <h1 style="text-align: center;">Azul e Doido</h1>
-    
-    {% if posts %}
-        {% for post in posts %}
-        <article class="post">
-            <h2>{{ post[1] }}</h2>
-            <p class="data">Postado em: {{ post[3] }}</p>
-            <div class="conteudo">
-                {{ post[2] | safe }}
-            </div>
-        </article>
-        {% endfor %}
-    {% else %}
-        <div class="post">
-            <h2>Bem-vindo!</h2>
-            <p>Ainda não há posts por aqui. Se você é o administrador, vá em "Escrever" e comece agora!</p>
-        </div>
-    {% endif %}
+<div class="container">
+    <main>
+        <h1 style="text-align: center;">Azul e Doido</h1>
+        {% if posts %}
+            {% for post in posts %}
+            <article class="post">
+                <h2>{{ post[1] }}</h2>
+                <p class="data">Postado em: {{ post[3] }}</p>
+                <div class="conteudo">{{ post[2] | safe }}</div>
+            </article>
+            {% endfor %}
+        {% else %}
+            <div class="post"><h2>Nenhum post ainda...</h2></div>
+        {% endif %}
+    </main>
 
-    <div class="contador">
-        Total de visualizações: {{ acessos }}
-    </div>
-</main>
+    <aside>
+        <div class="widget">
+            <h3>Visualizações</h3>
+            <p style="font-size: 1.5em; font-weight: bold; color: #00aaff;">{{ acessos }}</p>
+        </div>
+        
+        <div class="widget">
+            <h3>Arquivo</h3>
+            <ul>
+                {% for data in datas_arquivo %}
+                <li>{{ data[1] }}/{{ data[0] }} ({{ data[2] }})</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </aside>
+</div>
 
 </body>
 </html>

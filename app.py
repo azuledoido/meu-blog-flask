@@ -29,9 +29,7 @@ def configurar_banco():
         cur.execute("CREATE TABLE IF NOT EXISTS mural (id SERIAL PRIMARY KEY, nome TEXT NOT NULL, mensagem TEXT NOT NULL, data_postagem TIMESTAMP DEFAULT CURRENT_TIMESTAMP);")
         cur.execute("CREATE TABLE IF NOT EXISTS contador (id SERIAL PRIMARY KEY, total INTEGER);")
         cur.execute("INSERT INTO contador (id, total) SELECT 1, 1500 WHERE NOT EXISTS (SELECT 1 FROM contador WHERE id = 1);")
-        conn.commit()
-        cur.close()
-        conn.close()
+        conn.commit(); cur.close(); conn.close()
     except: pass
 
 def obter_total_acessos():
@@ -41,25 +39,38 @@ def obter_total_acessos():
         cur = conn.cursor()
         cur.execute("UPDATE contador SET total = total + 1 WHERE id = 1 RETURNING total")
         total = cur.fetchone()[0]
-        conn.commit()
-        cur.close()
-        conn.close()
+        conn.commit(); cur.close(); conn.close()
         return total
     except: return "1500+"
 
+def obter_arquivo_datas():
+    try:
+        conn = get_db_connection()
+        if not conn: return []
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT EXTRACT(YEAR FROM data_criacao)::int, EXTRACT(MONTH FROM data_criacao)::int, COUNT(*)::int
+            FROM posts GROUP BY 1, 2 ORDER BY 1 DESC, 2 DESC;
+        """)
+        datas = cur.fetchall()
+        cur.close(); conn.close()
+        return datas
+    except: return []
+
 @app.route('/')
 def home():
-    posts, acessos = [], obter_total_acessos()
+    acessos = obter_total_acessos()
+    datas_arquivo = obter_arquivo_datas()
+    posts = []
     try:
         conn = get_db_connection()
         if conn:
             cur = conn.cursor()
             cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC;")
             posts = cur.fetchall()
-            cur.close()
-            conn.close()
+            cur.close(); conn.close()
     except: pass
-    return render_template('index.html', posts=posts, acessos=acessos)
+    return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
 
 @app.route('/mural', methods=['GET', 'POST'])
 def mural():
