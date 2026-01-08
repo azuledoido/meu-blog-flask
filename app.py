@@ -56,46 +56,13 @@ def home():
         return render_template('index.html', posts=p, acessos=acessos, datas_arquivo=datas)
     except: return render_template('index.html', posts=[], acessos=acessos, datas_arquivo=datas)
 
-@app.route('/post/<int:post_id>')
-def exibir_post(post_id):
+# --- NOVA ROTA INTEGRADA PARA DESCONGELAR O ARQUIVO ---
+@app.route('/arquivo/<int:ano>/<int:mes>')
+def arquivo_data(ano, mes):
     acessos = obter_total_acessos()
+    datas_arquivo = obter_arquivo_datas()
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY HH24:MI') FROM posts WHERE id = %s", (post_id,))
-        p = cur.fetchone(); cur.close(); conn.close()
-        if p: return render_template('post.html', post=p, acessos=acessos)
-        return redirect(url_for('home'))
-    except: return redirect(url_for('home'))
-
-@app.route('/mural', methods=['GET', 'POST'])
-def mural():
-    if request.method == 'POST':
-        n, m = request.form.get('nome'), request.form.get('mensagem')
-        if n and m:
-            conn = get_db_connection()
-            cur = conn.cursor(); cur.execute("INSERT INTO mural (nome, mensagem) VALUES (%s, %s)", (n, m))
-            conn.commit(); cur.close(); conn.close()
-            return redirect(url_for('mural'))
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT nome, mensagem, TO_CHAR(data_postagem, 'DD/MM HH24:MI') FROM mural ORDER BY data_postagem DESC LIMIT 30;")
-        msg = cur.fetchall(); cur.close(); conn.close()
-        return render_template('mural.html', mensagens=msg, acessos=obter_total_acessos())
-    except: return render_template('mural.html', mensagens=[], acessos="1500+")
-
-@app.route('/escrever', methods=['GET', 'POST'])
-def escrever():
-    if request.method == 'POST' and request.form.get('senha_adm') == SENHA_ADM:
-        t, c = request.form.get('titulo'), request.form.get('conteudo')
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute('INSERT INTO posts (titulo, conteudo, data_criacao) VALUES (%s, %s, %s);', (t, c, datetime.now(FUSO_BR)))
-        conn.commit(); cur.close(); conn.close()
-        return redirect(url_for('home'))
-    return render_template('escrever.html')
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+        cur.execute("""
+            SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY
