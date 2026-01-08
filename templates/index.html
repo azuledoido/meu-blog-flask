@@ -2,23 +2,33 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="google-site-verification" content="wfKoyi0nGs_57l5RONIcQ89boVXjxNolm2u9s9sWwxI" />
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azul e Doido - Blog</title>
+    
+    <title>Azul e Doido - Pensamentos, Tecnologia e Docker</title>
+    <meta name="description" content="Blog pessoal de azul e doido sobre tecnologia, docker e estudos de programação. Acompanhe nossas publicações e deixe seu recado no mural!">
+    <meta name="keywords" content="blog, tecnologia, docker, programação, azul e doido, estudos">
+    <meta name="author" content="Azul e Doido">
+
+    <meta property="og:title" content="Azul e Doido - Blog Oficial">
+    <meta property="og:description" content="Confira os últimos posts sobre tecnologia e docker.">
+    <meta property="og:type" content="website">
+
     <style>
-        /* RESET E CONFIGURAÇÃO BASE */
+        /* SEU ESTILO ORIGINAL COM O TOQUE MODERNO */
         * { box-sizing: border-box; }
 
-        /* ANIMAÇÃO DE FUNDO MAIS VISÍVEL */
         @keyframes coresDoidas {
-            0% { background-color: #001a33; }   /* Azul Escuro */
-            50% { background-color: #004d99; }  /* Azul Médio (Brilhante) */
+            0% { background-color: #001a33; }
+            50% { background-color: #004d99; }
             100% { background-color: #001a33; }
         }
 
         body { 
             animation: coresDoidas 8s ease-in-out infinite;
             color: #e6f2ff; 
-            font-family: sans-serif; 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
             margin: 0; 
             padding: 0;
             overflow-x: hidden; 
@@ -27,127 +37,6 @@
         nav { 
             display: flex; justify-content: center; gap: 20px; 
             padding: 20px; background: #003366; border-bottom: 3px solid #00509e;
+            position: sticky; top: 0; z-index: 100;
         }
-        nav a { color: #ffffff; text-decoration: none; font-weight: bold; }
-        nav a:hover { color: #38bdf8; }
-
-        .layout { 
-            display: flex; 
-            max-width: 1100px; 
-            margin: 20px auto; 
-            padding: 0 15px; 
-            gap: 25px;
-            width: 100%;
-        }
-
-        main { flex: 2.5; min-width: 0; }
-
-        aside { 
-            flex: 1; 
-            background: #00264d; 
-            padding: 20px; 
-            border-radius: 10px; 
-            height: fit-content;
-            min-width: 250px; 
-            border: 1px solid #004080;
-        }
-
-        .contador-topo {
-            background: rgba(56, 189, 248, 0.1); padding: 12px;
-            border-radius: 8px; text-align: center; margin-bottom: 25px;
-            border: 1px dashed #38bdf8; color: #38bdf8; font-weight: bold;
-        }
-
-        .item { 
-            background: #00264d; 
-            padding: 25px; 
-            border-radius: 12px; 
-            margin-bottom: 25px; 
-            border-left: 6px solid #007bff;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            transition: all 0.3s ease;
-        }
-
-        .item:hover { 
-            transform: translateX(10px) scale(1.01); 
-            border-left-color: #38bdf8;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
-        }
-
-        .post-title { color: #38bdf8; font-size: 1.5rem; text-decoration: none; font-weight: bold; display: block; }
-        .post-date { color: #88aacc; display: block; margin-top: 15px; font-size: 0.8rem; }
-        
-        .badge-count { background: #007bff; color: white; padding: 2px 8px; border-radius: 10px; float: right; }
-        
-        .link-arquivo { 
-            display: block; color: #add8e6; text-decoration: none; padding: 10px; 
-            border-bottom: 1px solid #004080;
-            transition: 0.3s;
-        }
-        .link-arquivo:hover { background: #003366; padding-left: 15px; color: #38bdf8; }
-
-        /* --- FORÇA BRUTA PARA RESPONSIVIDADE (IMAGENS E VÍDEOS) --- */
-        .item img, .item video, .item iframe {
-            max-width: 100% !important;
-            height: auto !important;
-            border-radius: 8px;
-            display: block;
-            margin: 15px auto;
-        }
-
-        @media (max-width: 850px) { 
-            .layout { flex-direction: column; } 
-            aside { width: 100%; min-width: 100%; }
-            /* Garante que no mobile nada escape mesmo */
-            .item { padding: 15px; }
-        }
-    </style>
-</head>
-<body>
-    <nav>
-        <a href="/">🏠 BLOG</a>
-        <a href="/mural">💬 MURAL</a>
-        <a href="/escrever">✍️ ESCREVER</a>
-    </nav>
-
-    <div class="layout">
-        <main>
-            <div class="contador-topo">
-                👁️ {{ acessos }} ACESSOS
-            </div>
-
-            <h1 style="color: #38bdf8; margin-bottom: 20px;">📑 Publicações</h1>
-
-            {% if posts %}
-                {% for p in posts %}
-                <div class="item">
-                    <a href="/post/{{ p[0] }}" class="post-title">{{ p[1] }}</a>
-                    <div style="margin-top:15px; line-height: 1.6;">{{ p[2]|safe }}</div>
-                    <span class="post-date">📅 {{ p[3] }}</span>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="item">
-                    <h2 style="color: #38bdf8;">NENHUM POST ENCONTRADO</h2>
-                    <p>Parece que não há publicações nesta categoria ou data.</p>
-                </div>
-            {% endif %}
-        </main>
-
-        <aside>
-            <h3 style="color: #38bdf8; margin-top: 0;">📅 ARQUIVO</h3>
-            {% if datas_arquivo %}
-                {% for d in datas_arquivo %}
-                <a href="/arquivo/{{ d[0] }}/{{ d[1] }}" class="link-arquivo">
-                    📁 {{ d[1] }}/{{ d[0] }} 
-                    <span class="badge-count">{{ d[2] }}</span>
-                </a>
-                {% endfor %}
-            {% else %}
-                <p style="color: #88aacc; font-size: 0.8rem;">Nenhum arquivo disponível.</p>
-            {% endif %}
-        </aside>
-    </div>
-</body>
-</html>
+        nav a { color: #ffffff; text-decoration: none; font-weight: bold
