@@ -20,12 +20,13 @@
             font-family: 'Segoe UI', sans-serif;
         }
         .content-box { 
-            background: rgba(255, 255, 255, 0.05); 
+            /* Mudamos para um azul marinho bem escuro e quase sem transparência para facilitar a leitura */
+            background: rgba(10, 25, 47, 0.98); 
             backdrop-filter: blur(15px); 
             padding: 40px; 
             border-radius: 20px; 
-            border: 1px solid rgba(0, 170, 255, 0.3);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(0, 170, 255, 0.4);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
         .btn-voltar {
             color: #00aaff;
@@ -36,56 +37,4 @@
             background: #00aaff;
             color: white;
         }
-        img { max-width: 100%; border-radius: 10px; margin: 20px 0; }
-
-        #disqus_thread {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 40px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-9">
-                <div class="content-box">
-                    <a href="/" class="btn btn-voltar btn-sm mb-4">
-                        <i class="fas fa-house-chimney"></i> Voltar para a Casinha
-                    </a>
-                    
-                    <h1 class="text-info mb-3">{{ post[1] }}</h1>
-                    
-                    <div class="d-flex align-items-center gap-3 opacity-75 small mb-4">
-                        <span><i class="fas fa-calendar-alt"></i> {{ post[3] }}</span>
-                        <span><i class="fas fa-user-ninja"></i> Azul e Doido</span>
-                    </div>
-
-                    <hr class="border-secondary mb-4">
-                    
-                    <div class="post-body" style="line-height: 1.8; font-size: 1.1rem;">
-                        {{ post[2] | safe }}
-                    </div>
-
-                    <div id="disqus_thread"></div>
-                    <script>
-                        var disqus_config = function () {
-                            this.page.url = "{{ request.url }}";  
-                            this.page.identifier = "{{ post[0] }}"; 
-                        };
-                        (function() { 
-                            var d = document, s = d.createElement('script');
-                            // Agora usando o shortname correto: azuledoido
-                            s.src = 'https://azuledoido.disqus.com/embed.js';
-                            s.setAttribute('data-timestamp', +new Date());
-                            (d.head || d.body).appendChild(s);
-                        })();
-                    </script>
-                    <noscript>Por favor, habilite o JavaScript para ver os comentários.</noscript>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+        img { max-width: 100%; border-radius: 10px; margin: 20px
