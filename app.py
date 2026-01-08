@@ -20,57 +20,47 @@ def get_db_connection():
         return psycopg2.connect(url)
     except: return None
 
-def configurar_banco():
-    conn = get_db_connection()
-    if not conn: return
-    try:
-        cur = conn.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS posts (id SERIAL PRIMARY KEY, titulo TEXT NOT NULL, conteudo TEXT NOT NULL, data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP);")
-        cur.execute("CREATE TABLE IF NOT EXISTS mural (id SERIAL PRIMARY KEY, nome TEXT NOT NULL, mensagem TEXT NOT NULL, data_postagem TIMESTAMP DEFAULT CURRENT_TIMESTAMP);")
-        cur.execute("CREATE TABLE IF NOT EXISTS contador (id SERIAL PRIMARY KEY, total INTEGER);")
-        cur.execute("INSERT INTO contador (id, total) SELECT 1, 1500 WHERE NOT EXISTS (SELECT 1 FROM contador WHERE id = 1);")
-        conn.commit(); cur.close(); conn.close()
-    except: pass
-
+# Funções de suporte originais
 def obter_total_acessos():
     try:
         conn = get_db_connection()
-        if not conn: return "1500+"
         cur = conn.cursor()
         cur.execute("UPDATE contador SET total = total + 1 WHERE id = 1 RETURNING total")
-        total = cur.fetchone()[0]
+        t = cur.fetchone()[0]
         conn.commit(); cur.close(); conn.close()
-        return total
+        return t
     except: return "1500+"
 
 def obter_arquivo_datas():
     try:
         conn = get_db_connection()
-        if not conn: return []
         cur = conn.cursor()
-        cur.execute("""
-            SELECT EXTRACT(YEAR FROM data_criacao)::int, EXTRACT(MONTH FROM data_criacao)::int, COUNT(*)::int
-            FROM posts GROUP BY 1, 2 ORDER BY 1 DESC, 2 DESC;
-        """)
-        datas = cur.fetchall()
-        cur.close(); conn.close()
-        return datas
+        cur.execute("SELECT EXTRACT(YEAR FROM data_criacao)::int, EXTRACT(MONTH FROM data_criacao)::int, COUNT(*)::int FROM posts GROUP BY 1, 2 ORDER BY 1 DESC, 2 DESC;")
+        d = cur.fetchall(); cur.close(); conn.close()
+        return d
     except: return []
 
 @app.route('/')
 def home():
     acessos = obter_total_acessos()
-    datas_arquivo = obter_arquivo_datas()
-    posts = []
+    datas = obter_arquivo_datas()
     try:
         conn = get_db_connection()
-        if conn:
-            cur = conn.cursor()
-            cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC;")
-            posts = cur.fetchall()
-            cur.close(); conn.close()
-    except: pass
-    return render_template('index.html', posts=posts, acessos=acessos, datas_arquivo=datas_arquivo)
+        cur = conn.cursor()
+        cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC;")
+        p = cur.fetchall(); cur.close(); conn.close()
+        return render_template('index.html', posts=p, acessos=acessos, datas_arquivo=datas)
+    except: return render_template('index.html', posts=[], acessos=acessos, datas_arquivo=datas)
+
+@app.route('/post/<int:post_id>')
+def exibir_post(post_id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY HH24:MI') FROM posts WHERE id = %s", (post_id,))
+        p = cur.fetchone(); cur.close(); conn.close()
+        return render_template('post.html', post=p, acessos=obter_total_acessos())
+    except: return redirect(url_for('home'))
 
 @app.route('/mural', methods=['GET', 'POST'])
 def mural():
@@ -78,34 +68,27 @@ def mural():
         n, m = request.form.get('nome'), request.form.get('mensagem')
         if n and m:
             conn = get_db_connection()
-            if conn:
-                cur = conn.cursor(); cur.execute("INSERT INTO mural (nome, mensagem) VALUES (%s, %s)", (n, m))
-                conn.commit(); cur.close(); conn.close()
-                return redirect(url_for('mural'))
-    mensagens = []
+            cur = conn.cursor(); cur.execute("INSERT INTO mural (nome, mensagem) VALUES (%s, %s)", (n, m))
+            conn.commit(); cur.close(); conn.close()
+            return redirect(url_for('mural'))
     try:
         conn = get_db_connection()
-        if conn:
-            cur = conn.cursor()
-            cur.execute("SELECT nome, mensagem, TO_CHAR(data_postagem, 'DD/MM HH24:MI') FROM mural ORDER BY data_postagem DESC LIMIT 30;")
-            mensagens = cur.fetchall()
-            cur.close(); conn.close()
-    except: pass
-    return render_template('mural.html', mensagens=mensagens, acessos=obter_total_acessos())
+        cur = conn.cursor()
+        cur.execute("SELECT nome, mensagem, TO_CHAR(data_postagem, 'DD/MM HH24:MI') FROM mural ORDER BY data_postagem DESC LIMIT 30;")
+        msg = cur.fetchall(); cur.close(); conn.close()
+        return render_template('mural.html', mensagens=msg, acessos=obter_total_acessos())
+    except: return render_template('mural.html', mensagens=[], acessos="1500+")
 
 @app.route('/escrever', methods=['GET', 'POST'])
 def escrever():
     if request.method == 'POST' and request.form.get('senha_adm') == SENHA_ADM:
         t, c = request.form.get('titulo'), request.form.get('conteudo')
         conn = get_db_connection()
-        if conn:
-            cur = conn.cursor()
-            cur.execute('INSERT INTO posts (titulo, conteudo, data_criacao) VALUES (%s, %s, %s);', (t, c, datetime.now(FUSO_BR)))
-            conn.commit(); cur.close(); conn.close()
-            return redirect(url_for('home'))
+        cur = conn.cursor()
+        cur.execute('INSERT INTO posts (titulo, conteudo, data_criacao) VALUES (%s, %s, %s);', (t, c, datetime.now(FUSO_BR)))
+        conn.commit(); cur.close(); conn.close()
+        return redirect(url_for('home'))
     return render_template('escrever.html')
-
-configurar_banco()
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
