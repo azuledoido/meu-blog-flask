@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* MANTENDO A IDENTIDADE VISUAL PULSANTE */
         @keyframes coresDoidas { 
             0% { background-color: #000d1a; } 
             50% { background-color: #00264d; } 
@@ -38,6 +37,14 @@
             color: white;
         }
         img { max-width: 100%; border-radius: 10px; margin: 20px 0; }
+
+        /* Estilização extra para o Disqus não destoar do layout */
+        #disqus_thread {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 40px;
+        }
     </style>
 </head>
 <body>
@@ -61,6 +68,22 @@
                     <div class="post-body" style="line-height: 1.8; font-size: 1.1rem;">
                         {{ post[2] | safe }}
                     </div>
+
+                    <div id="disqus_thread"></div>
+                    <script>
+                        var disqus_config = function () {
+                            this.page.url = "{{ request.url }}";  
+                            this.page.identifier = "{{ post[0] }}"; 
+                        };
+                        (function() { 
+                            var d = document, s = d.createElement('script');
+                            // IMPORTANTE: Substitua 'Azul e doido' pelo nome que você criar no Disqus
+                            s.src = 'https://SEU-NOME-CURTO-AQUI.disqus.com/embed.js';
+                            s.setAttribute('data-timestamp', +new Date());
+                            (d.head || d.body).appendChild(s);
+                        })();
+                    </script>
+                    <noscript>Por favor, habilite o JavaScript para ver os comentários.</noscript>
                 </div>
             </div>
         </div>
