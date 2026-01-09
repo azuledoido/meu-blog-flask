@@ -4,9 +4,30 @@
     <title>Gerenciar Posts - Azul e Doido</title>
     <style>
         body { background: #0a192f; color: white; font-family: sans-serif; text-align: center; }
-        .post-item { border: 1px solid #112240; padding: 15px; margin: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-        button { background: #ff4b2b; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
-        input { padding: 10px; margin: 20px; }
+        .post-item { 
+            border: 1px solid #112240; 
+            padding: 15px; 
+            margin: 10px auto; 
+            border-radius: 8px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: 800px;
+            background: #112240;
+        }
+        .btn-excluir { background: #ff4b2b; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .btn-editar { 
+            background: #f39c12; 
+            color: white; 
+            text-decoration: none; 
+            padding: 8px 15px; 
+            border-radius: 5px; 
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .btn-entrar { background: #64ffda; color: #0a192f; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        input { padding: 10px; margin: 20px; background: #0a192f; border: 1px solid #64ffda; color: white; border-radius: 5px; }
+        .acoes { display: flex; align-items: center; }
     </style>
 </head>
 <body>
@@ -15,19 +36,28 @@
     {% if not posts %}
     <form method="POST">
         <input type="password" name="senha" placeholder="Senha ADM">
-        <button type="submit" style="background: #64ffda; color: #0a192f;">Entrar</button>
+        <button type="submit" class="btn-entrar">Entrar</button>
     </form>
     {% else %}
         {% for p in posts %}
         <div class="post-item">
-            <span><strong>{{ p[1] }}</strong> ({{ p[2] }})</span>
-            <form action="{{ url_for('deletar_post', post_id=p[0]) }}" method="POST" onsubmit="return confirm('Tem certeza?');">
-                <input type="hidden" name="senha" value="{{ senha }}">
-                <button type="submit">Excluir</button>
-            </form>
+            <span><strong>{{ p[1] }}</strong> <small style="opacity: 0.6;">({{ p[2] }})</small></span>
+            
+            <div class="acoes">
+                <a href="/editar/{{ p[0] }}?senha={{ senha }}" class="btn-editar">Editar</a>
+
+                <form action="{{ url_for('deletar_post', post_id=p[0]) }}" method="POST" onsubmit="return confirm('Tem certeza? Isso não pode ser desfeito!');">
+                    <input type="hidden" name="senha" value="{{ senha }}">
+                    <button type="submit" class="btn-excluir">Excluir</button>
+                </form>
+            </div>
         </div>
         {% endfor %}
-        <br><a href="/" style="color: #64ffda;">Voltar ao Site</a>
+        <br>
+        <div style="margin-top: 20px;">
+            <a href="/escrever" style="color: #64ffda; margin-right: 20px; text-decoration: none;">+ Escrever Novo Post</a>
+            <a href="/" style="color: #64ffda; text-decoration: none;">Voltar ao Site</a>
+        </div>
     {% endif %}
 </body>
 </html>

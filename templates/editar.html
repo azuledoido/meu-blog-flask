@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Post - Azul e Doido</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #000d1a; color: #e6f2ff; padding: 50px; }
+        .box { background: rgba(10, 25, 47, 0.9); padding: 30px; border-radius: 15px; border: 1px solid #00aaff; }
+        input, textarea { background: #001a33 !important; color: white !important; border: 1px solid #004d99 !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="box">
+            <h2>Editar Post #{{ post[0] }}</h2>
+            <form action="/editar/{{ post[0] }}" method="POST">
+                <input type="hidden" name="senha_adm" value="{{ senha }}">
+                <div class="mb-3">
+                    <label>Título</label>
+                    <input type="text" name="titulo" class="form-control" value="{{ post[1] }}" required>
+                </div>
+                <div class="mb-3">
+                    <label>Conteúdo (HTML aceito)</label>
+                    <textarea name="conteudo" class="form-control" rows="12" required>{{ post[2] }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                <a href="/admin_posts" class="btn btn-outline-secondary">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

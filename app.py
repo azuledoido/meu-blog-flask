@@ -83,18 +83,39 @@ def escrever():
         return redirect(url_for('home'))
     return render_template('escrever.html')
 
-# --- NOVA ROTA: GERENCIADOR DE POSTS ---
+# --- ROTA DE EDIÇÃO INTEGRADA ---
+@app.route('/editar/<int:post_id>', methods=['GET', 'POST'])
+def editar_post(post_id):
+    senha = request.args.get('senha') or request.form.get('senha_adm')
+    if senha != SENHA_ADM:
+        return "Acesso negado", 403
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    if request.method == 'POST':
+        t, c = request.form.get('titulo'), request.form.get('conteudo')
+        cur.execute('UPDATE posts SET titulo = %s, conteudo = %s WHERE id = %s', (t, c, post_id))
+        conn.commit(); cur.close(); conn.close()
+        return redirect(url_for('admin_posts', senha_sucesso=SENHA_ADM))
+
+    cur.execute("SELECT id, titulo, conteudo FROM posts WHERE id = %s", (post_id,))
+    p = cur.fetchone(); cur.close(); conn.close()
+    if p: return render_template('editar.html', post=p, senha=senha)
+    return redirect(url_for('admin_posts'))
+
 @app.route('/admin_posts', methods=['GET', 'POST'])
 def admin_posts():
     posts = []
-    if request.method == 'POST':
-        if request.form.get('senha') == SENHA_ADM:
-            conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute("SELECT id, titulo, TO_CHAR(data_criacao, 'DD/MM/YY HH24:MI') FROM posts ORDER BY data_criacao DESC")
-            posts = cur.fetchall()
-            cur.close(); conn.close()
-            return render_template('admin_posts.html', posts=posts, senha=SENHA_ADM)
+    # Pega a senha tanto de formulário quanto de redirecionamento
+    senha_verificar = request.form.get('senha') or request.args.get('senha_sucesso')
+    
+    if senha_verificar == SENHA_ADM:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id, titulo, TO_CHAR(data_criacao, 'DD/MM/YY HH24:MI') FROM posts ORDER BY data_criacao DESC")
+        posts = cur.fetchall(); cur.close(); conn.close()
+        return render_template('admin_posts.html', posts=posts, senha=SENHA_ADM)
     return render_template('admin_posts.html', posts=posts)
 
 @app.route('/deletar/<int:post_id>', methods=['POST'])
@@ -106,7 +127,6 @@ def deletar_post(post_id):
         conn.commit(); cur.close(); conn.close()
     return redirect(url_for('admin_posts'))
 
-# As outras rotas (mural, arquivo_data) permanecem iguais...
 @app.route('/mural', methods=['GET', 'POST'])
 def mural():
     if request.method == 'POST':
