@@ -1,7 +1,7 @@
 import os, psycopg2, pytz, re
 import cloudinary
 import cloudinary.uploader
-from flask import Flask, render_template, request, redirect, url_for, abort
+from flask import Flask, render_template, request, redirect, url_for, abort, Response
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -20,6 +20,13 @@ cloudinary.config(
   api_key = os.environ.get('CLOUDINARY_API_KEY'), 
   api_secret = os.environ.get('CLOUDINARY_API_SECRET')
 )
+
+# --- ROTA PARA LIBERAR BOTS (RESOLVE ERRO 403) ---
+@app.route('/robots.txt')
+def robots():
+    r = Response(response="User-agent: *\nAllow: /", status=200, mimetype="text/plain")
+    r.headers["Content-Type"] = "text/plain; charset=utf-8"
+    return r
 
 def get_db_connection():
     try:
