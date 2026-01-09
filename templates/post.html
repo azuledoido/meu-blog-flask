@@ -12,7 +12,6 @@
     {% if post[2] and 'src="' in post[2] %}
         {% set partes = post[2].split('src="') %}
         {% if partes|length > 1 %}
-            {# Pega o link da imagem e remove o que vem depois da aspa de fechamento #}
             {% set img_url = partes[1].split('"')[0] %}
         {% endif %}
     {% endif %}
@@ -72,6 +71,14 @@
             margin-top: 40px;
             border: 1px dashed rgba(0, 170, 255, 0.3);
         }
+
+        /* Estilo Botões Compartilhar */
+        .share-buttons { margin: 30px 0; display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-share { padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .share-threads { background: #fff; color: #000; }
+        .share-threads:hover { background: #ddd; color: #000; }
+        .share-fb { background: #1877f2; color: #fff; }
+        .share-fb:hover { background: #145dbf; color: #fff; }
     </style>
 </head>
 <body>
@@ -94,6 +101,17 @@
                     
                     <div class="post-body" style="line-height: 1.8; font-size: 1.1rem; color: #ccd6f6;">
                         {{ post[2] | safe }}
+                    </div>
+
+                    <div class="share-buttons">
+                        <a href="https://www.threads.net/intent/post?text={{ post[1]|urlencode }}%20{{ request.url|urlencode }}" 
+                           target="_blank" class="btn-share share-threads">
+                            <i class="fab fa-threads"></i> Compartilhar no Threads
+                        </a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}" 
+                           target="_blank" class="btn-share share-fb">
+                            <i class="fab fa-facebook"></i> Facebook
+                        </a>
                     </div>
 
                     <div id="disqus_thread"></div>
