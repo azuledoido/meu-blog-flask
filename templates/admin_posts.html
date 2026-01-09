@@ -25,9 +25,19 @@
             font-size: 14px;
             margin-right: 10px;
         }
-        .btn-entrar { background: #64ffda; color: #0a192f; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
-        input { padding: 10px; margin: 20px; background: #0a192f; border: 1px solid #64ffda; color: white; border-radius: 5px; }
+        .btn-entrar { background: #64ffda; color: #0a192f; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        input { padding: 10px; margin: 10px; background: #0a192f; border: 1px solid #64ffda; color: white; border-radius: 5px; }
         .acoes { display: flex; align-items: center; }
+        
+        /* Estilo para a área de upload */
+        .upload-box {
+            background: #112240;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 800px;
+            border: 2px dashed #64ffda;
+        }
     </style>
 </head>
 <body>
@@ -39,6 +49,21 @@
         <button type="submit" class="btn-entrar">Entrar</button>
     </form>
     {% else %}
+        
+        <div class="upload-box">
+            <h3 style="color: #64ffda; margin-top: 0;">📤 Upar Nova Imagem (Cloudinary)</h3>
+            <form action="/upload_cloudinary" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="senha" value="{{ senha }}">
+                <input type="file" name="foto" accept="image/*" required>
+                <button type="submit" class="btn-entrar">Gerar Link da Imagem</button>
+            </form>
+            <p style="font-size: 0.8em; color: #8892b0; margin-top: 10px;">
+                Após subir, copie o link gerado e use no post como: &lt;img src="LINK"&gt;
+            </p>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #233554; max-width: 800px; margin: 30px auto;">
+
         {% for p in posts %}
         <div class="post-item">
             <span><strong>{{ p[1] }}</strong> <small style="opacity: 0.6;">({{ p[2] }})</small></span>
@@ -53,9 +78,10 @@
             </div>
         </div>
         {% endfor %}
+        
         <br>
-        <div style="margin-top: 20px;">
-            <a href="/escrever" style="color: #64ffda; margin-right: 20px; text-decoration: none;">+ Escrever Novo Post</a>
+        <div style="margin-top: 20px; margin-bottom: 50px;">
+            <a href="/escrever" style="color: #64ffda; margin-right: 20px; text-decoration: none; font-weight: bold;">+ Escrever Novo Post</a>
             <a href="/" style="color: #64ffda; text-decoration: none;">Voltar ao Site</a>
         </div>
     {% endif %}

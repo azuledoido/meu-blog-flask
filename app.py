@@ -1,4 +1,6 @@
 import os, psycopg2, pytz, re
+import cloudinary
+import cloudinary.uploader
 from flask import Flask, render_template, request, redirect, url_for, abort
 from datetime import datetime
 from dotenv import load_dotenv
@@ -7,9 +9,17 @@ load_dotenv()
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 
+# CONFIGURAÇÕES
 SENHA_ADM = "3484020200"
 DATABASE_URL = os.environ.get('DATABASE_URL')
 FUSO_BR = pytz.timezone('America/Sao_Paulo')
+
+# CONFIGURAÇÃO CLOUDINARY
+cloudinary.config(
+  cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME'), 
+  api_key = os.environ.get('CLOUDINARY_API_KEY'), 
+  api_secret = os.environ.get('CLOUDINARY_API_SECRET')
+)
 
 def get_db_connection():
     try:
@@ -43,6 +53,28 @@ def obter_arquivo_datas():
         d = cur.fetchall(); cur.close(); conn.close()
         return d
     except: return []
+
+# --- NOVA ROTA: UPLOAD DE IMAGEM ---
+@app.route('/upload_cloudinary', methods=['POST'])
+def upload_cloudinary():
+    if request.form.get('senha') != SENHA_ADM:
+        return "Senha incorreta", 403
+    
+    if 'foto' not in request.files:
+        return "Nenhum arquivo enviado", 400
+    
+    arquivo = request.files['foto']
+    if arquivo.filename == '':
+        return "Arquivo sem nome", 400
+
+    try:
+        # Faz o upload para a nuvem
+        resultado = cloudinary.uploader.upload(arquivo)
+        link_direto = resultado['secure_url']
+        # Retorna o link em texto puro para você copiar
+        return f"Link Gerado com Sucesso! Copie e use no post:<br><br><b>{link_direto}</b><br><br><a href='javascript:history.back()'>Voltar</a>"
+    except Exception as e:
+        return f"Erro no upload: {str(e)}"
 
 @app.route('/')
 def home():
@@ -83,7 +115,6 @@ def escrever():
         return redirect(url_for('home'))
     return render_template('escrever.html')
 
-# --- ROTA DE EDIÇÃO INTEGRADA ---
 @app.route('/editar/<int:post_id>', methods=['GET', 'POST'])
 def editar_post(post_id):
     senha = request.args.get('senha') or request.form.get('senha_adm')
@@ -107,7 +138,6 @@ def editar_post(post_id):
 @app.route('/admin_posts', methods=['GET', 'POST'])
 def admin_posts():
     posts = []
-    # Pega a senha tanto de formulário quanto de redirecionamento
     senha_verificar = request.form.get('senha') or request.args.get('senha_sucesso')
     
     if senha_verificar == SENHA_ADM:
