@@ -15,18 +15,19 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 FUSO_BR = pytz.timezone('America/Sao_Paulo')
 
 # CONFIGURAÇÃO CLOUDINARY
-cloudinary.config(
-  cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME'), 
-  api_key = os.environ.get('CLOUDINARY_API_KEY'), 
-  api_secret = os.environ.get('CLOUDINARY_API_SECRET')
-)
+try:
+    cloudinary.config(
+      cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME'), 
+      api_key = os.environ.get('CLOUDINARY_API_KEY'), 
+      api_secret = os.environ.get('CLOUDINARY_API_SECRET')
+    )
+except Exception as e:
+    print(f"Erro ao configurar Cloudinary: {e}")
 
-# --- CORREÇÃO DE ERRO 403 E PERMISSÕES PARA REDES SOCIAIS ---
+# --- CABEÇALHOS ANTI-BLOQUEIO (403) ---
 @app.after_request
 def add_header(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
-    response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
     if request.path.startswith('/post/'):
         response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     return response
@@ -35,7 +36,6 @@ def add_header(response):
 def robots():
     return Response("User-agent: *\nAllow: /", mimetype="text/plain")
 
-# --- FUNÇÕES DE BANCO ---
 def get_db_connection():
     try:
         url = DATABASE_URL
@@ -43,7 +43,9 @@ def get_db_connection():
         if "sslmode" not in url:
             url += "&sslmode=require" if "?" in url else "?sslmode=require"
         return psycopg2.connect(url)
-    except: return None
+    except Exception as e:
+        print(f"Erro de conexão com DB: {e}")
+        return None
 
 def extrair_primeira_img(conteudo):
     if not conteudo: return None
@@ -53,6 +55,7 @@ def extrair_primeira_img(conteudo):
 def obter_total_acessos():
     try:
         conn = get_db_connection()
+        if not conn: return "1500+"
         cur = conn.cursor()
         cur.execute("UPDATE contador SET total = total + 1 WHERE id = 1 RETURNING total")
         t = cur.fetchone()[0]
@@ -63,55 +66,45 @@ def obter_total_acessos():
 def obter_arquivo_datas():
     try:
         conn = get_db_connection()
+        if not conn: return []
         cur = conn.cursor()
         cur.execute("SELECT EXTRACT(YEAR FROM data_criacao)::int, EXTRACT(MONTH FROM data_criacao)::int, COUNT(*)::int FROM posts GROUP BY 1, 2 ORDER BY 1 DESC, 2 DESC;")
         d = cur.fetchall(); cur.close(); conn.close()
         return d
     except: return []
 
-# --- ROTAS DE ADMINISTRAÇÃO E UPLOAD ---
 @app.route('/upload_cloudinary', methods=['POST'])
 def upload_cloudinary():
-    if request.form.get('senha') != SENHA_ADM:
-        return "Senha incorreta", 403
-    if 'foto' not in request.files:
-        return "Nenhum arquivo enviado", 400
-    arquivo = request.files['foto']
-    if arquivo.filename == '':
-        return "Arquivo sem nome", 400
+    if request.form.get('senha') != SENHA_ADM: return "Senha incorreta", 403
+    arquivo = request.files.get('foto')
+    if not arquivo or arquivo.filename == '': return "Arquivo inválido", 400
     try:
         resultado = cloudinary.uploader.upload(arquivo)
-        link_direto = resultado['secure_url']
-        return f"Link Gerado com Sucesso! Copie e use no post:<br><br><b>{link_direto}</b><br><br><a href='javascript:history.back()'>Voltar</a>"
-    except Exception as e:
-        return f"Erro no upload: {str(e)}"
+        return f"Link: <b>{resultado['secure_url']}</b><br><br><a href='javascript:history.back()'>Voltar</a>"
+    except Exception as e: return f"Erro: {str(e)}"
 
-# --- ROTAS DO BLOG ---
 @app.route('/')
 def home():
     acessos = obter_total_acessos()
     datas = obter_arquivo_datas()
     try:
         conn = get_db_connection()
+        if not conn: return render_template('index.html', posts=[], acessos=acessos, datas_arquivo=datas)
         cur = conn.cursor()
         cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts ORDER BY data_criacao DESC;")
         p_brutos = cur.fetchall(); cur.close(); conn.close()
-        posts_com_img = []
-        for p in p_brutos:
-            img = extrair_primeira_img(p[2])
-            posts_com_img.append(list(p) + [img])
+        posts_com_img = [list(p) + [extrair_primeira_img(p[2])] for p in p_brutos]
         return render_template('index.html', posts=posts_com_img, acessos=acessos, datas_arquivo=datas)
     except: return render_template('index.html', posts=[], acessos=acessos, datas_arquivo=datas)
 
 @app.route('/post/<int:post_id>')
 def exibir_post(post_id):
-    acessos = obter_total_acessos()
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY HH24:MI') FROM posts WHERE id = %s", (post_id,))
         p = cur.fetchone(); cur.close(); conn.close()
-        if p: return render_template('post.html', post=p, acessos=acessos)
+        if p: return render_template('post.html', post=p, acessos=obter_total_acessos())
         return redirect(url_for('home'))
     except: return redirect(url_for('home'))
 
@@ -129,8 +122,7 @@ def escrever():
 @app.route('/editar/<int:post_id>', methods=['GET', 'POST'])
 def editar_post(post_id):
     senha = request.args.get('senha') or request.form.get('senha_adm')
-    if senha != SENHA_ADM:
-        return "Acesso negado", 403
+    if senha != SENHA_ADM: return "Acesso negado", 403
     conn = get_db_connection()
     cur = conn.cursor()
     if request.method == 'POST':
@@ -140,21 +132,59 @@ def editar_post(post_id):
         return redirect(url_for('admin_posts', senha_sucesso=SENHA_ADM))
     cur.execute("SELECT id, titulo, conteudo FROM posts WHERE id = %s", (post_id,))
     p = cur.fetchone(); cur.close(); conn.close()
-    if p: return render_template('editar.html', post=p, senha=senha)
-    return redirect(url_for('admin_posts'))
+    return render_template('editar.html', post=p, senha=senha) if p else redirect(url_for('admin_posts'))
 
 @app.route('/admin_posts', methods=['GET', 'POST'])
 def admin_posts():
-    posts = []
-    senha_verificar = request.form.get('senha') or request.args.get('senha_sucesso')
-    if senha_verificar == SENHA_ADM:
+    senha = request.form.get('senha') or request.args.get('senha_sucesso')
+    if senha == SENHA_ADM:
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("SELECT id, titulo, TO_CHAR(data_criacao, 'DD/MM/YY HH24:MI') FROM posts ORDER BY data_criacao DESC")
         posts = cur.fetchall(); cur.close(); conn.close()
         return render_template('admin_posts.html', posts=posts, senha=SENHA_ADM)
-    return render_template('admin_posts.html', posts=posts)
+    return render_template('admin_posts.html', posts=[])
 
 @app.route('/deletar/<int:post_id>', methods=['POST'])
 def deletar_post(post_id):
-    if request.form.get('senha') == SEN
+    if request.form.get('senha') == SENHA_ADM:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM posts WHERE id = %s", (post_id,))
+        conn.commit(); cur.close(); conn.close()
+    return redirect(url_for('admin_posts'))
+
+@app.route('/mural', methods=['GET', 'POST'])
+def mural():
+    if request.method == 'POST':
+        n, m = request.form.get('nome'), request.form.get('mensagem')
+        if n and m:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("INSERT INTO mural (nome, mensagem) VALUES (%s, %s)", (n, m))
+            conn.commit(); cur.close(); conn.close()
+            return redirect(url_for('mural'))
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT nome, mensagem, TO_CHAR(data_postagem, 'DD/MM HH24:MI') FROM mural ORDER BY data_postagem DESC LIMIT 30;")
+        msg = cur.fetchall(); cur.close(); conn.close()
+        return render_template('mural.html', mensagens=msg, acessos=obter_total_acessos())
+    except: return render_template('mural.html', mensagens=[], acessos="1500+")
+
+@app.route('/arquivo/<int:ano>/<int:mes>')
+def arquivo_data(ano, mes):
+    acessos = obter_total_acessos()
+    datas_arquivo = obter_arquivo_datas()
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE EXTRACT(YEAR FROM data_criacao) = %s AND EXTRACT(MONTH FROM data_criacao) = %s ORDER BY data_criacao DESC;", (ano, mes))
+        p_brutos = cur.fetchall(); cur.close(); conn.close()
+        posts_com_img = [list(p) + [extrair_primeira_img(p[2])] for p in p_brutos]
+        return render_template('index.html', posts=posts_com_img, acessos=acessos, datas_arquivo=datas_arquivo)
+    except: return redirect(url_for('home'))
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
