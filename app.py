@@ -21,13 +21,24 @@ cloudinary.config(
   api_secret = os.environ.get('CLOUDINARY_API_SECRET')
 )
 
-# --- ROTA PARA LIBERAR BOTS (RESOLVE ERRO 403) ---
+# --- CORREÇÃO DE ERRO 403 E PERMISSÕES ---
+@app.after_request
+def add_header(response):
+    # Libera o acesso para bots de redes sociais (CORS)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+    # Garante que o cache não trave versões antigas durante os testes
+    if request.path.startswith('/post/'):
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    return response
+
 @app.route('/robots.txt')
 def robots():
-    r = Response(response="User-agent: *\nAllow: /", status=200, mimetype="text/plain")
-    r.headers["Content-Type"] = "text/plain; charset=utf-8"
-    return r
+    # Resposta limpa e direta para os bots
+    return Response("User-agent: *\nAllow: /", mimetype="text/plain")
 
+# --- FUNÇÕES DE BANCO ---
 def get_db_connection():
     try:
         url = DATABASE_URL
@@ -61,28 +72,24 @@ def obter_arquivo_datas():
         return d
     except: return []
 
-# --- NOVA ROTA: UPLOAD DE IMAGEM ---
+# --- ROTAS DE ADMINISTRAÇÃO E UPLOAD ---
 @app.route('/upload_cloudinary', methods=['POST'])
 def upload_cloudinary():
     if request.form.get('senha') != SENHA_ADM:
         return "Senha incorreta", 403
-    
     if 'foto' not in request.files:
         return "Nenhum arquivo enviado", 400
-    
     arquivo = request.files['foto']
     if arquivo.filename == '':
         return "Arquivo sem nome", 400
-
     try:
-        # Faz o upload para a nuvem
         resultado = cloudinary.uploader.upload(arquivo)
         link_direto = resultado['secure_url']
-        # Retorna o link em texto puro para você copiar
         return f"Link Gerado com Sucesso! Copie e use no post:<br><br><b>{link_direto}</b><br><br><a href='javascript:history.back()'>Voltar</a>"
     except Exception as e:
         return f"Erro no upload: {str(e)}"
 
+# --- ROTAS DO BLOG ---
 @app.route('/')
 def home():
     acessos = obter_total_acessos()
@@ -127,16 +134,13 @@ def editar_post(post_id):
     senha = request.args.get('senha') or request.form.get('senha_adm')
     if senha != SENHA_ADM:
         return "Acesso negado", 403
-
     conn = get_db_connection()
     cur = conn.cursor()
-
     if request.method == 'POST':
         t, c = request.form.get('titulo'), request.form.get('conteudo')
         cur.execute('UPDATE posts SET titulo = %s, conteudo = %s WHERE id = %s', (t, c, post_id))
         conn.commit(); cur.close(); conn.close()
         return redirect(url_for('admin_posts', senha_sucesso=SENHA_ADM))
-
     cur.execute("SELECT id, titulo, conteudo FROM posts WHERE id = %s", (post_id,))
     p = cur.fetchone(); cur.close(); conn.close()
     if p: return render_template('editar.html', post=p, senha=senha)
@@ -146,7 +150,6 @@ def editar_post(post_id):
 def admin_posts():
     posts = []
     senha_verificar = request.form.get('senha') or request.args.get('senha_sucesso')
-    
     if senha_verificar == SENHA_ADM:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -164,39 +167,4 @@ def deletar_post(post_id):
         conn.commit(); cur.close(); conn.close()
     return redirect(url_for('admin_posts'))
 
-@app.route('/mural', methods=['GET', 'POST'])
-def mural():
-    if request.method == 'POST':
-        n, m = request.form.get('nome'), request.form.get('mensagem')
-        if n and m:
-            conn = get_db_connection()
-            cur = conn.cursor(); cur.execute("INSERT INTO mural (nome, mensagem) VALUES (%s, %s)", (n, m))
-            conn.commit(); cur.close(); conn.close()
-            return redirect(url_for('mural'))
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT nome, mensagem, TO_CHAR(data_postagem, 'DD/MM HH24:MI') FROM mural ORDER BY data_postagem DESC LIMIT 30;")
-        msg = cur.fetchall(); cur.close(); conn.close()
-        return render_template('mural.html', mensagens=msg, acessos=obter_total_acessos())
-    except: return render_template('mural.html', mensagens=[], acessos="1500+")
-
-@app.route('/arquivo/<int:ano>/<int:mes>')
-def arquivo_data(ano, mes):
-    acessos = obter_total_acessos()
-    datas_arquivo = obter_arquivo_datas()
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT id, titulo, conteudo, TO_CHAR(data_criacao, 'DD/MM/YYYY') FROM posts WHERE EXTRACT(YEAR FROM data_criacao) = %s AND EXTRACT(MONTH FROM data_criacao) = %s ORDER BY data_criacao DESC;", (ano, mes))
-        p_brutos = cur.fetchall(); cur.close(); conn.close()
-        posts_com_img = []
-        for p in p_brutos:
-            img = extrair_primeira_img(p[2])
-            posts_com_img.append(list(p) + [img])
-        return render_template('index.html', posts=posts_com_img, acessos=acessos, datas_arquivo=datas_arquivo)
-    except: return redirect(url_for('home'))
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+@app.route('/mural', methods
