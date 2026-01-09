@@ -9,6 +9,11 @@ load_dotenv()
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 
+# --- FILTRO PARA O HTML FUNCIONAR ---
+@app.template_filter('select_img')
+def select_img_filter(content):
+    return extrair_primeira_img(content)
+
 # CONFIGURAÇÕES
 SENHA_ADM = "3484020200"
 DATABASE_URL = os.environ.get('DATABASE_URL')
@@ -50,6 +55,7 @@ def get_db_connection():
 
 def extrair_primeira_img(conteudo):
     if not conteudo: return None
+    # Busca a URL da primeira imagem no HTML do post
     match = re.search(r'<img [^>]*src="([^"]+)"', conteudo)
     return match.group(1) if match else None
 
